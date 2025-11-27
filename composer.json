@@ -17,7 +17,9 @@
         "ext-pdo": "*",
         "ext-pdo_mysql": "*",
         "ext-tokenizer": "*",
+        "akara/bagisto-midtrans-payment": "^1.0",
         "astrotomic/laravel-translatable": "^11.0.0",
+        "bagisto/bagisto-package-generator": "^2.1",
         "bagisto/image-cache": "dev-master",
         "barryvdh/laravel-dompdf": "^2.0.0",
         "diglactic/laravel-breadcrumbs": "^9.0",
@@ -61,6 +63,8 @@
     "autoload": {
         "psr-4": {
             "App\\": "app/",
+            "Triatek\\RajaOngkir\\": "packages/Triatek/RajaOngkir/src/",
+            "Triatek\\RajaOngkirTest\\": "packages/Triatek/RajaOngkirTest/src/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/",
             "Webkul\\Admin\\": "packages/Webkul/Admin/src",
@@ -126,13 +130,15 @@
             ]
         }
     },
-    "repositories": [{
-        "type": "path",
-        "url": "packages/*/*",
-        "options": {
-            "symlink": true
+    "repositories": [
+        {
+            "type": "path",
+            "url": "packages/*/*",
+            "options": {
+                "symlink": true
+            }
         }
-    }],
+    ],
     "config": {
         "optimize-autoloader": true,
         "preferred-install": "dist",
