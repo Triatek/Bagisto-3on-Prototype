@@ -5,9 +5,9 @@
 @php
     // --- 1. CONFIGURASI HOTSPOT ---
     $hotspotSettings = [
-        'point1' => ['id' => 0, 'top' => '10%', 'left' => '50%'],
-        'point2' => ['id' => 0, 'top' => '35%', 'left' => '45%'],
-        'point3' => ['id' => 0, 'top' => '50%', 'left' => '55%'],
+        'point1' => ['id' => 64, 'top' => '10%', 'left' => '50%'],
+        'point2' => ['id' => 59, 'top' => '35%', 'left' => '45%'],
+        'point3' => ['id' => 54, 'top' => '50%', 'left' => '55%'],
     ];
 
     $getHotspotProduct = function($id) use ($productRepository) {
@@ -129,9 +129,10 @@
 
 
         /* GLOBAL STYLES */
-        .product-detail-page .swatch-container .swatch-option { border: 1px solid #e5e7eb !important; background: #fff !important; color: #000 !important; border-radius: 4px !important; min-width: 45px; height: 40px; display: flex; align-items: center; justify-content: center; font-weight: 600; cursor: pointer; }
-        .product-detail-page .swatch-container .swatch-option.active { background: #000 !important; color: #fff !important; border-color: #000 !important; }
-        .product-detail-page .swatch-container .color-swatch-option { width: 35px !important; height: 35px !important; border-radius: 50% !important; border: 1px solid #ddd !important; }
+        .product-detail-page .swatch-container .swatch-option { border: 1px solid #e5e7eb; background-color: #fff; color: #000 !important; border-radius: 4px !important; min-width: 45px; height: 40px; display: flex; align-items: center; justify-content: center; font-weight: 600; cursor: pointer; font-size: 14px;}
+        .product-detail-page .swatch-container .color-swatch-option { width: 35px !important; height: 35px !important; border-radius: 50% !important; border: 1px solid #ddd !important;}
+        .product-detail-page .swatch-container .swatch-option.active { border-color: #000 !important; }
+        .product-detail-page .swatch-container .swatch-option:not(.color-swatch-option).active {background: #000 !important; color: #fff !important;}
         .product-detail-page .swatch-container .color-swatch-option.active { box-shadow: 0 0 0 2px #fff, 0 0 0 4px #000 !important; border: none !important; }
 
         .marketing-box { margin-bottom: 20px; }
