@@ -16,17 +16,30 @@ Homestead.yaml
 npm-debug.log
 package-lock.json
 /playwright-report
+
 /public/css
 /public/js
 /public/hot
 /public/storage
 /public/vendor
+
 /lang/vendor
+
 /storage/*.key
 /storage/dcc-data/
+/storage/framework
+/storage/logs
+/storage/app/private
+
 /test-results
 /vendor
 yarn.lock
 yarn-error.log
 /test-results
 /playwright-report
+
+# =========================================
+#   ALLOW PRODUCT IMAGES TO BE TRACKED
+# =========================================
+!storage/app/public/
+!storage/app/public/**
