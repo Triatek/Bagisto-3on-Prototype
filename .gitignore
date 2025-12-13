@@ -1,32 +1,45 @@
 .env
 .env.testing
 .idea
-.php_cs.cache
-.phpunit.result.cache
 .vscode
 .vagrant
 *.hot
+npm-debug.log
+package-lock.json
+yarn.lock
+yarn-error.log
+
+# Composer / PHP
+/vendor
+/storage/*.key
+/storage/dcc-data/
+storage/framework
+storage/logs
+storage/app/private
+
+# Node
+/node_modules
+
+# Laravel
+.php_cs.cache
+.phpunit.result.cache
 /stubs
 /data
 /docker-compose-collection
 Homestead.json
 Homestead.yaml
 /ignorables/*
-/node_modules
-npm-debug.log
-package-lock.json
-/playwright-report
-/public/css
-/public/js
-/public/hot
-/public/storage
-/public/vendor
-/lang/vendor
-/storage/*.key
-/storage/dcc-data/
-/test-results
-/vendor
-yarn.lock
-yarn-error.log
 /test-results
 /playwright-report
+
+# Build Assets (Recompile sendiri di laptop)
+public/css
+public/js
+public/hot
+public/vendor
+
+# ===========================================
+#  ALLOW PRODUCT IMAGES TO BE TRACKED
+# ===========================================
+!storage/app/public/
+!storage/app/public/**
