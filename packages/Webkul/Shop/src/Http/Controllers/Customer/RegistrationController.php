@@ -42,27 +42,39 @@ class RegistrationController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function store(RegistrationRequest $registrationRequest)
+public function store()
     {
+        // 1. VALIDASI MANUAL (Hanya Email & Password)
+        // Kita bypass validasi nama bawaan Bagisto di sini
+        $this->validate(request(), [
+            'email'      => 'email|required|unique:customers,email',
+            'password'   => 'confirmed|min:6|required',
+            'is_subscribed' => 'nullable',
+        ]);
+
         $customerGroup = core()->getConfigData('customer.settings.create_new_account_options.default_group');
 
         $subscription = $this->subscriptionRepository->findOneWhere(['email' => request()->input('email')]);
 
-        $data = array_merge($registrationRequest->only([
-            'first_name',
-            'last_name',
-            'email',
-            'password_confirmation',
-            'is_subscribed',
-        ]), [
-            'password'                  => bcrypt(request()->input('password')),
-            'api_token'                 => Str::random(80),
-            'is_verified'               => ! core()->getConfigData('customer.settings.email.verification'),
-            'customer_group_id'         => $this->customerGroupRepository->findOneWhere(['code' => $customerGroup])->id,
-            'channel_id'                => core()->getCurrentChannel()->id,
-            'token'                     => md5(uniqid(rand(), true)),
+        // 2. LOGIKA MANIPULASI NAMA
+        // Ambil nama dari email (sebelum tanda @)
+        $emailParts = explode('@', request()->input('email'));
+        $generatedName = ucfirst($emailParts[0]); // Huruf depan jadi besar
+
+        // 3. MENYUSUN DATA
+        $data = [
+            'first_name'            => $generatedName, // Nama otomatis
+            'last_name'             => '(Member)',     // Placeholder belakang
+            'email'                 => request()->input('email'),
+            'password'              => bcrypt(request()->input('password')),
+            'api_token'             => Str::random(80),
+            'is_verified'           => ! core()->getConfigData('customer.settings.email.verification'),
+            'customer_group_id'     => $this->customerGroupRepository->findOneWhere(['code' => $customerGroup])->id,
+            'channel_id'            => core()->getCurrentChannel()->id,
+            'token'                 => md5(uniqid(rand(), true)),
+            'is_subscribed'         => request()->input('is_subscribed'),
             'subscribed_to_news_letter' => (bool) (request()->input('is_subscribed') ?? $subscription?->is_subscribed),
-        ]);
+        ];
 
         Event::dispatch('customer.registration.before');
 

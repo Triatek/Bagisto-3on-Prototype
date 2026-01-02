@@ -1,4 +1,3 @@
-<!-- SEO Meta Content -->
 @push('meta')
     <meta
         name="description"
@@ -16,15 +15,13 @@
     :has-feature="false"
     :has-footer="false"
 >
-    <!-- Page Title -->
     <x-slot:title>
         @lang('shop::app.customers.signup-form.page-title')
     </x-slot>
 
-	<div class="container mt-20 max-1180:px-5 max-md:mt-12">
+    <div class="container mt-20 max-1180:px-5 max-md:mt-12">
         {!! view_render_event('bagisto.shop.customers.sign-up.logo.before') !!}
 
-        <!-- Company Logo -->
         <div class="flex items-center gap-x-14 max-[1180px]:gap-x-9">
             <a
                 href="{{ route('shop.home.index') }}"
@@ -42,13 +39,12 @@
 
         {!! view_render_event('bagisto.shop.customers.sign-up.logo.before') !!}
 
-        <!-- Form Container -->
-		<div class="m-auto w-full max-w-[870px] rounded-xl border border-zinc-200 p-16 px-[90px] max-md:px-8 max-md:py-8 max-sm:border-none max-sm:p-0">
-			<h1 class="font-dmserif text-4xl max-md:text-3xl max-sm:text-xl">
+        <div class="m-auto w-full max-w-[870px] rounded-xl border border-zinc-200 p-16 px-[90px] max-md:px-8 max-md:py-8 max-sm:border-none max-sm:p-0">
+            <h1 class="font-dmserif text-4xl max-md:text-3xl max-sm:text-xl">
                 @lang('shop::app.customers.signup-form.page-title')
             </h1>
 
-			<p class="mt-4 text-xl text-zinc-500 max-sm:mt-0 max-sm:text-sm">
+            <p class="mt-4 text-xl text-zinc-500 max-sm:mt-0 max-sm:text-sm">
                 @lang('shop::app.customers.signup-form.form-signup-text')
             </p>
 
@@ -56,53 +52,11 @@
                 <x-shop::form :action="route('shop.customers.register.store')">
                     {!! view_render_event('bagisto.shop.customers.signup_form_controls.before') !!}
 
-                    <!-- First Name -->
-                    <x-shop::form.control-group>
-                        <x-shop::form.control-group.label class="required">
-                            @lang('shop::app.customers.signup-form.first-name')
-                        </x-shop::form.control-group.label>
+                    {{-- 
+                        🔥 MODIFIKASI: Input Nama Dihapus
+                        Karena di Controller sudah kita set otomatis ambil dari Email
+                    --}}
 
-                        <x-shop::form.control-group.control
-                            type="text"
-                            class="px-6 py-4 max-md:py-3 max-sm:py-2"
-                            name="first_name"
-                            rules="required"
-                            :value="old('first_name')"
-                            :label="trans('shop::app.customers.signup-form.first-name')"
-                            :placeholder="trans('shop::app.customers.signup-form.first-name')"
-                            :aria-label="trans('shop::app.customers.signup-form.first-name')"
-                            aria-required="true"
-                        />
-
-                        <x-shop::form.control-group.error control-name="first_name" />
-                    </x-shop::form.control-group>
-
-                    {!! view_render_event('bagisto.shop.customers.signup_form.first_name.after') !!}
-
-                    <!-- Last Name -->
-                    <x-shop::form.control-group>
-                        <x-shop::form.control-group.label class="required">
-                            @lang('shop::app.customers.signup-form.last-name')
-                        </x-shop::form.control-group.label>
-
-                        <x-shop::form.control-group.control
-                            type="text"
-                            class="px-6 py-4 max-md:py-3 max-sm:py-2"
-                            name="last_name"
-                            rules="required"
-                            :value="old('last_name')"
-                            :label="trans('shop::app.customers.signup-form.last-name')"
-                            :placeholder="trans('shop::app.customers.signup-form.last-name')"
-                            :aria-label="trans('shop::app.customers.signup-form.last-name')"
-                            aria-required="true"
-                        />
-
-                        <x-shop::form.control-group.error control-name="last_name" />
-                    </x-shop::form.control-group>
-
-                    {!! view_render_event('bagisto.shop.customers.signup_form.last_name.after') !!}
-
-                    <!-- Email -->
                     <x-shop::form.control-group>
                         <x-shop::form.control-group.label class="required">
                             @lang('shop::app.customers.signup-form.email')
@@ -125,7 +79,6 @@
 
                     {!! view_render_event('bagisto.shop.customers.signup_form.email.after') !!}
 
-                    <!-- Password -->
                     <x-shop::form.control-group class="mb-6">
                         <x-shop::form.control-group.label class="required">
                             @lang('shop::app.customers.signup-form.password')
@@ -149,7 +102,6 @@
 
                     {!! view_render_event('bagisto.shop.customers.signup_form.password.after') !!}
 
-                    <!-- Confirm Password -->
                     <x-shop::form.control-group>
                         <x-shop::form.control-group.label>
                             @lang('shop::app.customers.signup-form.confirm-pass')
@@ -172,7 +124,6 @@
 
                     {!! view_render_event('bagisto.shop.customers.signup_form.password_confirmation.after') !!}
 
-                    <!-- Captcha -->
                     @if (core()->getConfigData('customer.captcha.credentials.status'))
                         <x-shop::form.control-group>
                             {!! \Webkul\Customer\Facades\Captcha::render() !!}
@@ -181,7 +132,6 @@
                         </x-shop::form.control-group>
                     @endif
 
-                    <!-- Subscribed Button -->
                     @if (core()->getConfigData('customer.settings.create_new_account_options.news_letter'))
                         <div class="mb-5 flex select-none items-center gap-1.5">
                             <input
@@ -242,7 +192,6 @@
                     @endif
 
                     <div class="mt-8 flex flex-wrap items-center gap-9 max-sm:justify-center max-sm:gap-5">
-                        <!-- Save Button -->
                         <button
                             class="primary-button m-0 mx-auto block w-full max-w-[374px] rounded-2xl px-11 py-4 text-center text-base max-md:max-w-full max-md:rounded-lg max-md:py-3 max-sm:py-1.5 ltr:ml-0 rtl:mr-0"
                             type="submit"
@@ -260,7 +209,7 @@
                 </x-shop::form>
             </div>
 
-			<p class="mt-5 font-medium text-zinc-500 max-sm:text-center max-sm:text-sm">
+            <p class="mt-5 font-medium text-zinc-500 max-sm:text-center max-sm:text-sm">
                 @lang('shop::app.customers.signup-form.account-exists')
 
                 <a class="text-navyBlue"
@@ -269,18 +218,17 @@
                     @lang('shop::app.customers.signup-form.sign-in-button')
                 </a>
             </p>
-		</div>
+        </div>
 
         <p class="mb-4 mt-8 text-center text-xs text-zinc-500">
             @lang('shop::app.customers.signup-form.footer', ['current_year'=> date('Y') ])
         </p>
-	</div>
+    </div>
 
     @push('scripts')
         {!! \Webkul\Customer\Facades\Captcha::renderJS() !!}
     @endpush
 
-    <!-- Terms & Conditions Modal -->
     <x-shop::modal ref="termsModal">
         <x-slot:toggle></x-slot>
 
