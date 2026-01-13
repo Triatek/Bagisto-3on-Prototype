@@ -48,7 +48,16 @@ class RajaOngkir extends AbstractShipping
             return false;
         }
 
-        $listKurir = ['jne', 'pos', 'tiki']; 
+       $listKurir = [
+    'jne', 
+    'pos', 
+    'tiki', 
+    'sicepat', 
+    'jnt', 
+    'ninja', 
+    'lion', 
+    'anteraja'
+];
 
         // --- PERBAIKAN BERAT (THE 1 TON FIX) ---
         $totalWeight = 0;
