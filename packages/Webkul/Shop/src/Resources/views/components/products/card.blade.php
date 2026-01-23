@@ -122,9 +122,12 @@
 
                 {!! view_render_event('bagisto.shop.components.products.card.name.before') !!}
 
-                <p class="break-all text-base font-medium max-md:mb-1.5 max-md:max-w-56 max-md:whitespace-break-spaces max-md:leading-6 max-sm:max-w-[192px] max-sm:text-sm max-sm:leading-4">
+                <a
+                    :href="`{{ route('shop.product_or_category.index', '') }}/${product.url_key}`"
+                    :aria-label="product.name + ' '" 
+                    class="break-all text-base font-medium max-md:mb-1.5 max-md:max-w-56 max-md:whitespace-break-spaces max-md:leading-6 max-sm:max-w-[192px] max-sm:text-sm max-sm:leading-4">
                     @{{ product.name }}
-                </p>
+                </a>
 
                 {!! view_render_event('bagisto.shop.components.products.card.name.after') !!}
 
@@ -267,9 +270,12 @@
 
                 {!! view_render_event('bagisto.shop.components.products.card.name.before') !!}
 
-                <p class="text-base">
+                <a
+                    :href="`{{ route('shop.product_or_category.index', '') }}/${product.url_key}`"
+                    :aria-label="product.name + ' '" 
+                    class="text-base">
                     @{{ product.name }}
-                </p>
+                </a>
 
                 {!! view_render_event('bagisto.shop.components.products.card.name.after') !!}
 
@@ -430,30 +436,38 @@
                 addToCart() {
                     this.isAddingToCart = true;
 
-                    this.$axios.post('{{ route("shop.api.checkout.cart.store") }}', {
-                            'quantity': 1,
-                            'product_id': this.product.id,
-                        })
-                        .then(response => {
-                            if (response.data.message) {
-                                this.$emitter.emit('update-mini-cart', response.data.data );
+                    if (this.isCustomer) {
+                        this.$axios.post('{{ route("shop.api.checkout.cart.store") }}', {
+                                'quantity': 1,
+                                'product_id': this.product.id,
+                            })
+                            .then(response => {
+                                if (response.data.message) {
+                                    this.$emitter.emit('update-mini-cart', response.data.data );
+    
+                                    this.$emitter.emit('add-flash', { type: 'success', message: response.data.message });
+                                } else {
+                                    this.$emitter.emit('add-flash', { type: 'warning', message: response.data.data.message });
+                                }
+    
+                                this.isAddingToCart = false;
+                            })
+                            .catch(error => {
+                                this.$emitter.emit('add-flash', { type: 'error', message: error.response.data.message });
+    
+                                if (error.response.data.redirect_uri) {
+                                    window.location.href = error.response.data.redirect_uri;
+                                }
+    
+                                this.isAddingToCart = false;
+                            });
+                    } else {
+                        this.isAddingToCart = false;
 
-                                this.$emitter.emit('add-flash', { type: 'success', message: response.data.message });
-                            } else {
-                                this.$emitter.emit('add-flash', { type: 'warning', message: response.data.data.message });
-                            }
+                        let url = new URL(`${window.location.origin}/customer/login`);
 
-                            this.isAddingToCart = false;
-                        })
-                        .catch(error => {
-                            this.$emitter.emit('add-flash', { type: 'error', message: error.response.data.message });
-
-                            if (error.response.data.redirect_uri) {
-                                window.location.href = error.response.data.redirect_uri;
-                            }
-
-                            this.isAddingToCart = false;
-                        });
+                        window.location.href = url.href;
+                    }
                 },
             },
         });

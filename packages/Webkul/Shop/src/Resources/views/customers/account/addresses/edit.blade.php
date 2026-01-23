@@ -58,25 +58,6 @@
             >
                 {!! view_render_event('bagisto.shop.customers.account.address.edit_form_controls.before', ['address' => $address]) !!}
 
-                <!-- Company Name -->
-                <x-shop::form.control-group>
-                    <x-shop::form.control-group.label>
-                        @lang('shop::app.customers.account.addresses.edit.company-name')
-                    </x-shop::form.control-group.label>
-
-                    <x-shop::form.control-group.control
-                        type="text"
-                        name="company_name"
-                        :value="old('company_name') ?? $address->company_name"
-                        :label="trans('shop::app.customers.account.addresses.edit.company-name')"
-                        :placeholder="trans('shop::app.customers.account.addresses.edit.company-name')"
-                    />
-
-                    <x-shop::form.control-group.error control-name="company_name" />
-                </x-shop::form.control-group>
-
-                {!! view_render_event('bagisto.shop.customers.account.addresses.edit_form_controls.company_name.after', ['address' => $address]) !!}
-
                 <!-- First Name -->
                 <x-shop::form.control-group>
                     <x-shop::form.control-group.label class="required">
@@ -116,45 +97,6 @@
                 </x-shop::form.control-group>
 
                 {!! view_render_event('bagisto.shop.customers.account.addresses.edit_form_controls.last_name.after', ['address' => $address]) !!}
-
-                <!-- E-mail -->
-                <x-shop::form.control-group>
-                    <x-shop::form.control-group.label class="required">
-                        @lang('Email')
-                    </x-shop::form.control-group.label>
-
-                    <x-shop::form.control-group.control
-                        type="text"
-                        name="email"
-                        rules="required|email"
-                        :value="old('email') ?? $address->email"
-                        :label="trans('Email')"
-                        :placeholder="trans('Email')"
-                    />
-
-                    <x-shop::form.control-group.error control-name="email" />
-                </x-shop::form.control-group>
-
-                {!! view_render_event('bagisto.shop.customers.account.addresses.edit_form_controls.email.after', ['address' => $address]) !!}
-
-                <!-- Vat ID -->
-                <x-shop::form.control-group>
-                    <x-shop::form.control-group.label>
-                        @lang('shop::app.customers.account.addresses.edit.vat-id')
-                    </x-shop::form.control-group.label>
-
-                    <x-shop::form.control-group.control
-                        type="text"
-                        name="vat_id"
-                        :value="old('vat_id') ?? $address->vat_id"
-                        :label="trans('shop::app.customers.account.addresses.edit.vat-id')"
-                        :placeholder="trans('shop::app.customers.account.addresses.edit.vat-id')"
-                    />
-
-                    <x-shop::form.control-group.error control-name="vat_id" />
-                </x-shop::form.control-group>
-
-                {!! view_render_event('bagisto.shop.customers.account.addresses.edit_form_controls.vat_id.after', ['address' => $address]) !!}
 
                 @php
                     $addresses = explode(PHP_EOL, $address->address);

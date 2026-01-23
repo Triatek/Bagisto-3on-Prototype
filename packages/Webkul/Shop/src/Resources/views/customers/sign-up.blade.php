@@ -52,10 +52,28 @@
                 <x-shop::form :action="route('shop.customers.register.store')">
                     {!! view_render_event('bagisto.shop.customers.signup_form_controls.before') !!}
 
-                    {{-- 
-                        🔥 MODIFIKASI: Input Nama Dihapus
-                        Karena di Controller sudah kita set otomatis ambil dari Email
-                    --}}
+                    <!-- Full Name -->
+                    <x-shop::form.control-group>
+                        <x-shop::form.control-group.label class="required">
+                            @lang('shop::app.customers.signup-form.full-name')
+                        </x-shop::form.control-group.label>
+
+                        <x-shop::form.control-group.control
+                            type="text"
+                            class="px-6 py-4 max-md:py-3 max-sm:py-2"
+                            name="full_name"
+                            rules="required"
+                            :value="old('full_name')"
+                            :label="trans('shop::app.customers.signup-form.full-name')"
+                            :placeholder="trans('shop::app.customers.signup-form.full-name')"
+                            :aria-label="trans('shop::app.customers.signup-form.full-name')"
+                            aria-required="true"
+                        />
+
+                        <x-shop::form.control-group.error control-name="full_name" />
+                    </x-shop::form.control-group>
+
+                    {!! view_render_event('bagisto.shop.customers.signup_form.first_name.after') !!}
 
                     <x-shop::form.control-group>
                         <x-shop::form.control-group.label class="required">
