@@ -1,8 +1,5 @@
 @pushOnce('scripts')
-    <script
-        type="text/x-template"
-        id="v-checkout-address-form-template"
-    >
+    <script type="text/x-template" id="v-checkout-address-form-template">
         <div class="mt-2 max-md:mt-3">
             <x-shop::form.control-group class="hidden">
                 <x-shop::form.control-group.control
@@ -12,66 +9,42 @@
                 />
             </x-shop::form.control-group>
 
-            <!-- Company Name -->
-            <x-shop::form.control-group>
-                <x-shop::form.control-group.label>
-                    @lang('shop::app.checkout.onepage.address.company-name')
+            {!! view_render_event('bagisto.shop.checkout.onepage.address.form.company_name.after') !!}
+
+            <x-shop::form.control-group class="!mb-4">
+                <x-shop::form.control-group.label class="required !mt-0">
+                    Nama Lengkap
                 </x-shop::form.control-group.label>
 
                 <x-shop::form.control-group.control
                     type="text"
-                    ::name="controlName + '.company_name'"
-                    ::value="address.company_name"
-                    :placeholder="trans('shop::app.checkout.onepage.address.company-name')"
+                    name="fullname_display"
+                    v-model="fullNameInput"
+                    @input="handleFullNameChange"
+                    rules="required"
+                    label="Nama Lengkap"
+                    placeholder="Nama Lengkap Penerima"
                 />
+                
+                <x-shop::form.control-group.error ::name="controlName + '.first_name'" />
             </x-shop::form.control-group>
 
-            {!! view_render_event('bagisto.shop.checkout.onepage.address.form.company_name.after') !!}
-
-            <!-- First Name -->
-            <div class="grid grid-cols-2 gap-x-5 max-md:grid-cols-1">
-                <x-shop::form.control-group>
-                    <x-shop::form.control-group.label class="required !mt-0">
-                        @lang('shop::app.checkout.onepage.address.first-name')
-                    </x-shop::form.control-group.label>
-
-                    <x-shop::form.control-group.control
-                        type="text"
-                        ::name="controlName + '.first_name'"
-                        ::value="address.first_name"
-                        rules="required"
-                        :label="trans('shop::app.checkout.onepage.address.first-name')"
-                        :placeholder="trans('shop::app.checkout.onepage.address.first-name')"
-                    />
-
-                    <x-shop::form.control-group.error ::name="controlName + '.first_name'" />
-                </x-shop::form.control-group>
-
-                {!! view_render_event('bagisto.shop.checkout.onepage.address.form.first_name.after') !!}
-
-                <!-- Last Name -->
-                <x-shop::form.control-group>
-                    <x-shop::form.control-group.label class="required !mt-0">
-                        @lang('shop::app.checkout.onepage.address.last-name')
-                    </x-shop::form.control-group.label>
-
-                    <x-shop::form.control-group.control
-                        type="text"
-                        ::name="controlName + '.last_name'"
-                        ::value="address.last_name"
-                        rules="required"
-                        :label="trans('shop::app.checkout.onepage.address.last-name')"
-                        :placeholder="trans('shop::app.checkout.onepage.address.last-name')"
-                    />
-
-                    <x-shop::form.control-group.error ::name="controlName + '.last_name'" />
-                </x-shop::form.control-group>
-
-                {!! view_render_event('bagisto.shop.checkout.onepage.address.form.last_name.after') !!}
+            <div class="hidden">
+                <x-shop::form.control-group.control
+                    type="text"
+                    ::name="controlName + '.first_name'"
+                    v-model="address.first_name"
+                    rules="required" 
+                />
+                
+                <x-shop::form.control-group.control
+                    type="text"
+                    ::name="controlName + '.last_name'"
+                    v-model="address.last_name"
+                />
             </div>
 
-            <!-- Email -->
-            <x-shop::form.control-group>
+            <x-shop::form.control-group class="!mb-4">
                 <x-shop::form.control-group.label class="required !mt-0">
                     @lang('shop::app.checkout.onepage.address.email')
                 </x-shop::form.control-group.label>
@@ -80,9 +53,11 @@
                     type="email"
                     ::name="controlName + '.email'"
                     ::value="address.email"
+                    v-model="address.email"
                     rules="required|email"
                     :label="trans('shop::app.checkout.onepage.address.email')"
                     placeholder="email@example.com"
+                    ::disabled="{{ auth('customer')->check() ? 'true' : 'false' }}"
                 />
 
                 <x-shop::form.control-group.error ::name="controlName + '.email'" />
@@ -90,28 +65,10 @@
 
             {!! view_render_event('bagisto.shop.checkout.onepage.address.form.email.after') !!}
 
-            <!-- Vat ID -->
             <template v-if="controlName=='billing'">
-                <x-shop::form.control-group>
-                    <x-shop::form.control-group.label>
-                        @lang('shop::app.checkout.onepage.address.vat-id')
-                    </x-shop::form.control-group.label>
-
-                    <x-shop::form.control-group.control
-                        type="text"
-                        ::name="controlName + '.vat_id'"
-                        ::value="address.vat_id"
-                        :label="trans('shop::app.checkout.onepage.address.vat-id')"
-                        :placeholder="trans('shop::app.checkout.onepage.address.vat-id')"
-                    />
-
-                    <x-shop::form.control-group.error ::name="controlName + '.vat_id'" />
-                </x-shop::form.control-group>
-
                 {!! view_render_event('bagisto.shop.checkout.onepage.address.form.vat_id.after') !!}
             </template>
 
-            <!-- Street Address -->
             <x-shop::form.control-group>
                 <x-shop::form.control-group.label class="required !mt-0">
                     @lang('shop::app.checkout.onepage.address.street-address')
@@ -152,7 +109,6 @@
             {!! view_render_event('bagisto.shop.checkout.onepage.address.form.address.after') !!}
 
             <div class="grid grid-cols-2 gap-x-5 max-md:grid-cols-1">
-                <!-- Country -->
                 <x-shop::form.control-group class="!mb-4">
                     <x-shop::form.control-group.label class="{{ core()->isCountryRequired() ? 'required' : '' }} !mt-0">
                         @lang('shop::app.checkout.onepage.address.country')
@@ -184,47 +140,26 @@
 
                 {!! view_render_event('bagisto.shop.checkout.onepage.address.form.country.after') !!}
 
-                <!-- State -->
-                <x-shop::form.control-group>
-                    <x-shop::form.control-group.label class="{{ core()->isStateRequired() ? 'required' : '' }} !mt-0">
+                <x-shop::form.control-group class="!mb-4">
+                    <x-shop::form.control-group.label class="required !mt-0">
                         @lang('shop::app.checkout.onepage.address.state')
                     </x-shop::form.control-group.label>
 
-                    <template v-if="states">
-                        <template v-if="haveStates">
-                            <x-shop::form.control-group.control
-                                type="select"
-                                ::name="controlName + '.state'"
-                                rules="{{ core()->isStateRequired() ? 'required' : '' }}"
-                                ::value="address.state"
-                                :label="trans('shop::app.checkout.onepage.address.state')"
-                                :placeholder="trans('shop::app.checkout.onepage.address.state')"
-                            >
-                                <option value="">
-                                    @lang('shop::app.checkout.onepage.address.select-state')
-                                </option>
-
-                                <option
-                                    v-for='(state, index) in states[selectedCountry]'
-                                    :value="state.code"
-                                >
-                                    @{{ state.default_name }}
-                                </option>
-                            </x-shop::form.control-group.control>
-                        </template>
-
-                        <template v-else>
-                            <x-shop::form.control-group.control
-                                type="text"
-                                ::name="controlName + '.state'"
-                                ::value="address.state"
-                                rules="{{ core()->isStateRequired() ? 'required' : '' }}"
-                                :label="trans('shop::app.checkout.onepage.address.state')"
-                                :placeholder="trans('shop::app.checkout.onepage.address.state')"
-                            />
-                        </template>
-                    </template>
-
+                    <x-shop::form.control-group.control
+                        type="select"
+                        ::name="controlName + '.state'"
+                        ::value="address.state"
+                        v-model="address.state"
+                        rules="required"
+                        :label="trans('shop::app.checkout.onepage.address.state')"
+                        @change="handleProvinceChange"
+                    >
+                        <option value="" disabled>Pilih Provinsi</option>
+                        <option v-for="prov in provinces" :key="prov.code" :value="prov.name">
+                            @{{ prov.name }}
+                        </option>
+                    </x-shop::form.control-group.control>
+    
                     <x-shop::form.control-group.error ::name="controlName + '.state'" />
                 </x-shop::form.control-group>
 
@@ -232,27 +167,31 @@
             </div>
 
             <div class="grid grid-cols-2 gap-x-5 max-md:grid-cols-1">
-                <!-- City -->
-                <x-shop::form.control-group>
+                <x-shop::form.control-group class="!mb-4">
                     <x-shop::form.control-group.label class="required !mt-0">
                         @lang('shop::app.checkout.onepage.address.city')
                     </x-shop::form.control-group.label>
 
                     <x-shop::form.control-group.control
-                        type="text"
+                        type="select"
                         ::name="controlName + '.city'"
                         ::value="address.city"
+                        v-model="address.city"
                         rules="required"
                         :label="trans('shop::app.checkout.onepage.address.city')"
-                        :placeholder="trans('shop::app.checkout.onepage.address.city')"
-                    />
-
+                        ::disabled="cities.length === 0"
+                    >
+                        <option value="" disabled>@{{ isFetchingCities ? 'Memuat...' : 'Pilih Kota / Kabupaten' }}</option>
+                        <option v-for="city in cities" :key="city.code" :value="city.name">
+                            @{{ city.name }}
+                        </option>
+                    </x-shop::form.control-group.control>
+    
                     <x-shop::form.control-group.error ::name="controlName + '.city'" />
                 </x-shop::form.control-group>
 
                 {!! view_render_event('bagisto.shop.checkout.onepage.address.form.city.after') !!}
 
-                <!-- Postcode -->
                 <x-shop::form.control-group>
                     <x-shop::form.control-group.label class="{{ core()->isPostCodeRequired() ? 'required' : '' }} !mt-0">
                         @lang('shop::app.checkout.onepage.address.postcode')
@@ -273,7 +212,6 @@
                 {!! view_render_event('bagisto.shop.checkout.onepage.address.form.postcode.after') !!}
             </div>
 
-            <!-- Phone Number -->
             <x-shop::form.control-group>
                 <x-shop::form.control-group.label class="required !mt-0">
                     @lang('shop::app.checkout.onepage.address.telephone')
@@ -307,7 +245,6 @@
 
                 address: {
                     type: Object,
-
                     default: () => ({
                         id: 0,
                         company_name: '',
@@ -326,11 +263,54 @@
 
             data() {
                 return {
-                    selectedCountry: this.address.country,
-
+                    template: '#v-checkout-address-form-template',
                     countries: [],
+                    states: [],
+                    fullNameInput: '', 
+                    provinces: [],
+                    cities: [],
+                    isFetchingCities: false,
+                }
+            },
 
-                    states: null,
+            created() {
+                // 1. Fetch Provinces
+                this.fetchProvinces();
+
+                // 2. Auto-Fill Logic
+                let profileFirstName = "{{ auth('customer')->user()?->first_name ?? '' }}";
+                let profileLastName  = "{{ auth('customer')->user()?->last_name ?? '' }}";
+                let profileEmail     = "{{ auth('customer')->user()?->email ?? '' }}";
+
+                // A. Logic Mengisi Nama (Saat load pertama)
+                if (this.address.first_name) {
+                    // Jika sedang edit alamat
+                    this.fullNameInput = this.address.first_name;
+                    if (this.address.last_name) {
+                        this.fullNameInput += ' ' + this.address.last_name;
+                    }
+                } 
+                else {
+                    // Jika alamat baru (ambil dari profil)
+                    if (profileFirstName) {
+                        this.fullNameInput = profileFirstName;
+                        this.address.first_name = profileFirstName;
+                        
+                        if (profileLastName) {
+                            this.fullNameInput += ' ' + profileLastName;
+                            this.address.last_name = profileLastName;
+                        } else {
+                            this.address.last_name = ''; // Profil cuma 1 kata, last_name kosong
+                        }
+                    }
+                }
+
+                if (!this.address.email && profileEmail) {
+                    this.address.email = profileEmail;
+                }
+                
+                if (!this.address.country) {
+                    this.address.country = 'ID';
                 }
             },
 
@@ -342,7 +322,6 @@
 
             mounted() {
                 this.getCountries();
-
                 this.getStates();
             },
 
@@ -362,6 +341,63 @@
                         })
                         .catch(() => {});
                 },
+
+                // --- LOGIC BARU: Last Name jadi NULL/KOSONG jika 1 kata ---
+                handleFullNameChange() {
+                    let rawInput = this.fullNameInput;
+                    let cleanName = rawInput.trim(); 
+                    
+                    if (!cleanName) {
+                        this.address.first_name = '';
+                        this.address.last_name = '';
+                        return;
+                    }
+
+                    let spaceIndex = cleanName.indexOf(' ');
+
+                    if (spaceIndex === -1) {
+                        // KASUS: Hanya 1 kata
+                        this.address.first_name = cleanName;
+                        this.address.last_name = ''; // REQUEST: Last Name dikosongkan
+                    } else {
+                        // KASUS: Lebih dari 1 kata
+                        this.address.first_name = cleanName.substring(0, spaceIndex);
+                        this.address.last_name = cleanName.substring(spaceIndex + 1);
+                    }
+                },
+
+                async fetchProvinces() {
+                    try {
+                        const response = await this.$axios.get('/indo-region/provinces');
+                        this.provinces = response.data;
+                    } catch (error) {
+                        console.error('Gagal ambil provinsi:', error);
+                    }
+                },
+
+                async fetchCities(provinceCode) {
+                    this.isFetchingCities = true;
+                    this.cities = [];
+                    this.address.city = ''; 
+                    
+                    try {
+                        const response = await this.$axios.get('/indo-region/cities/' + provinceCode);
+                        this.cities = response.data;
+                    } catch (error) {
+                        console.error('Gagal ambil kota:', error);
+                    } finally {
+                        this.isFetchingCities = false;
+                    }
+                },
+
+                handleProvinceChange(event) {
+                    const selectedName = event.target.value;
+                    const selectedProvObj = this.provinces.find(p => p.name === selectedName);
+
+                    if (selectedProvObj) {
+                        this.fetchCities(selectedProvObj.code);
+                    }
+                }
             }
         });
     </script>

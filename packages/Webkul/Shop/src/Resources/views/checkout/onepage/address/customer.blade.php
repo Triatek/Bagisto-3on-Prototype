@@ -38,12 +38,11 @@
                         </div>
 
                         <!-- Saved Customer Addresses Cards -->
-                        <div class="mb-2 grid grid-cols-2 gap-5 max-1060:grid-cols-[1fr] max-lg:grid-cols-2 max-md:mt-2 max-md:grid-cols-1">
+<div class="mb-2 grid grid-cols-2 gap-5 max-1060:grid-cols-[1fr] max-lg:grid-cols-2 max-md:mt-2 max-md:grid-cols-1">
                             <div
                                 class="relative max-w-[414px] cursor-pointer select-none rounded-xl border border-zinc-200 p-0 max-md:flex-wrap max-md:rounded-lg"
                                 v-for="address in customerSavedAddresses.billing"
                             >
-                                <!-- Actions -->
                                 <div class="absolute top-5 flex gap-2 ltr:right-5 rtl:left-5">
                                     <x-shop::form.control-group class="!mb-0 flex items-center gap-2.5">
                                         <x-shop::form.control-group.control
@@ -58,7 +57,6 @@
                                         />
                                     </x-shop::form.control-group>
 
-                                    <!-- Edit Icon -->
                                     <span
                                         class="icon-edit cursor-pointer text-2xl"
                                         @click="
@@ -69,7 +67,6 @@
                                     ></span>
                                 </div>
 
-                                <!-- Details -->
                                 <label
                                     class="block cursor-pointer rounded-xl p-5 max-sm:rounded-lg"
                                     :for="`billing_address_id_${address.id}`"
@@ -98,22 +95,12 @@
                                 </label>
                             </div>
 
-                            <!-- New Address Card -->
                             <div
-                                class="flex max-w-[414px] cursor-pointer items-center justify-center rounded-xl border border-zinc-200 p-5 max-md:flex-wrap max-md:rounded-lg"
-                                @click="activeAddressForm = 'billing'"
-                                v-if="! cart.billing_address"
+                                class="flex max-w-[414px] cursor-pointer items-center justify-center rounded-xl border border-zinc-200 p-5 max-md:flex-wrap max-md:rounded-lg border-dashed hover:border-navyBlue transition"
+                                @click="activeAddressForm = 'billing'; selectedAddressForEdit = null"
                             >
-                                <div
-                                    class="flex items-center gap-x-2.5"
-                                    role="button"
-                                    tabindex="0"
-                                >
-                                    <span
-                                        class="icon-plus rounded-full border border-black p-2.5 text-3xl max-sm:p-2"
-                                        role="presentation"
-                                    ></span>
-
+                                <div class="flex items-center gap-x-2.5">
+                                    <span class="icon-plus rounded-full border border-black p-2.5 text-3xl max-sm:p-2"></span>
                                     <p class="text-base">@lang('shop::app.checkout.onepage.address.add-new-address')</p>
                                 </div>
                             </div>
