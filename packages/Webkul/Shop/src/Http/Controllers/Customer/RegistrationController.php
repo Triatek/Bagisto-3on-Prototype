@@ -56,15 +56,17 @@ public function store()
 
         $subscription = $this->subscriptionRepository->findOneWhere(['email' => request()->input('email')]);
 
-        // 2. LOGIKA MANIPULASI NAMA
-        // Ambil nama dari email (sebelum tanda @)
-        $emailParts = explode('@', request()->input('email'));
-        $generatedName = ucfirst($emailParts[0]); // Huruf depan jadi besar
+        // // 2. LOGIKA MANIPULASI NAMA
+        // // Ambil nama dari email (sebelum tanda @)
+        // $emailParts = explode('@', request()->input('email'));
+        // $generatedName = ucfirst($emailParts[0]); // Huruf depan jadi besar
+        
+        $fullNameArr = explode(' ', ucwords(request()->input('full_name')));
 
         // 3. MENYUSUN DATA
         $data = [
-            'first_name'            => $generatedName, // Nama otomatis
-            'last_name'             => '(Member)',     // Placeholder belakang
+            'first_name'            => $fullNameArr[0], // Nama otomatis
+            'last_name'             => implode(' ', array_slice($fullNameArr, 1)),     // Placeholder belakang
             'email'                 => request()->input('email'),
             'password'              => bcrypt(request()->input('password')),
             'api_token'             => Str::random(80),
