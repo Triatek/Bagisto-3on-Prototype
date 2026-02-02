@@ -17,9 +17,8 @@
         "ext-pdo": "*",
         "ext-pdo_mysql": "*",
         "ext-tokenizer": "*",
-        "akara/bagisto-midtrans-payment": "^1.0",
         "astrotomic/laravel-translatable": "^11.0.0",
-        "bagisto/bagisto-package-generator": "^2.1",
+        "bagisto/bagisto-package-generator": "*",
         "bagisto/image-cache": "dev-master",
         "barryvdh/laravel-dompdf": "^2.0.0",
         "diglactic/laravel-breadcrumbs": "^9.0",
@@ -37,6 +36,7 @@
         "laravel/tinker": "^2.0",
         "laravel/ui": "^4.0",
         "maatwebsite/excel": "^3.1.46",
+        "midtrans/midtrans-php": "^2.6",
         "mpdf/mpdf": "^8.2",
         "nesbot/carbon": "^2.72.2",
         "openai-php/laravel": "^0.10.1",
@@ -64,6 +64,7 @@
     "autoload": {
         "psr-4": {
             "App\\": "app/",
+            "Triatek\\Midtrans\\": "packages/Triatek/Midtrans/src",
             "Triatek\\RajaOngkir\\": "packages/Triatek/RajaOngkir/src/",
             "Triatek\\RajaOngkirTest\\": "packages/Triatek/RajaOngkirTest/src/",
             "Database\\Factories\\": "database/factories/",
