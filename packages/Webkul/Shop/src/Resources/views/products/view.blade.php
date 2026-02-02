@@ -288,8 +288,8 @@
         <x-shop::shimmer.products.view />
     </v-product>
 
-    <div class="container-fluid" style="max-width: 100%; overflow-x: hidden;">
-        
+        <div class="container-fluid" style="max-width: 100%; overflow-x: hidden;">
+
         {{-- BANNER HOTSPOT --}}
         <div class="custom-promo-banner">
             <div class="cpb-left">
@@ -517,9 +517,16 @@
                                     </div>
                                     <span class="payment-label">Guarantee safe & secure checkout</span>
                                 </div>
-
                             </div>
                         </div>
+                        <div class="mt-12 border-t border-gray-200 pt-10" id="review-section" style="width: 100%;">
+                        <h2 class="text-3xl font-bold mb-8 text-center" style="font-family: 'Times New Roman', serif; text-transform: uppercase;">
+                            Customer Reviews
+                        </h2>
+                        
+                        {{-- Panggil Review Bagisto --}}
+                        @include('shop::products.view.reviews')
+                    </div>
                     </div>
                 </form>
             </x-shop::form>

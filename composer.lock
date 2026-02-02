@@ -4,60 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6735d81c3e888a19e3cf84c0f97a854c",
+    "content-hash": "e2870172d2b0723e85d747747dcee2b0",
     "packages": [
-        {
-            "name": "akara/bagisto-midtrans-payment",
-            "version": "v1.0.5",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/Nxx1/bagisto-midtrans-payment.git",
-                "reference": "a94ad0558798cfa839d7d2edbc2199c20e71cbb1"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/Nxx1/bagisto-midtrans-payment/zipball/a94ad0558798cfa839d7d2edbc2199c20e71cbb1",
-                "reference": "a94ad0558798cfa839d7d2edbc2199c20e71cbb1",
-                "shasum": ""
-            },
-            "require": {
-                "midtrans/midtrans-php": "^2.6",
-                "php": "^8.1"
-            },
-            "require-dev": {
-                "bagisto/bagisto": "2.3.x-dev"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "Akara\\MidtransPayment\\Providers\\MidtransServiceProvider",
-                        "Akara\\MidtransPayment\\Providers\\MidtransEventServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Akara\\MidtransPayment\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "N. Pratama",
-                    "email": "npratama028@gmail.com"
-                }
-            ],
-            "description": "Midtrans Payment Integration for Bagisto",
-            "support": {
-                "issues": "https://github.com/Nxx1/bagisto-midtrans-payment/issues",
-                "source": "https://github.com/Nxx1/bagisto-midtrans-payment/tree/v1.0.5"
-            },
-            "time": "2025-11-22T11:17:42+00:00"
-        },
         {
             "name": "astrotomic/laravel-translatable",
             "version": "v11.15.1",

@@ -4,6 +4,7 @@ namespace Webkul\Shop\Http\Controllers\API;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log; // Tambahan Log
 use Webkul\Checkout\Facades\Cart;
 use Webkul\Customer\Repositories\CustomerRepository;
 use Webkul\Payment\Facades\Payment;
@@ -143,6 +144,7 @@ class OnepageController extends APIController
 
     /**
      * Store order
+     * MODIFIED FOR MIDTRANS FIX
      */
     public function storeOrder()
     {
@@ -165,24 +167,39 @@ class OnepageController extends APIController
 
         $cart = Cart::getCart();
 
-        if ($redirectUrl = Payment::getRedirectUrl($cart)) {
-            return new JsonResource([
-                'redirect'     => true,
-                'redirect_url' => $redirectUrl,
-            ]);
-        }
-
+        // -------------------------------------------------------------
+        // PERUBAHAN BESAR DISINI (Urutan dibalik)
+        // -------------------------------------------------------------
+        
+        // 1. SIAPKAN DATA & BUAT ORDER DULUAN (Supaya Order ID tercipta)
         $data = (new OrderResource($cart))->jsonSerialize();
-
         $order = $this->orderRepository->create($data);
 
+        // 2. SIMPAN ID KE SESSION (Agar Midtrans.php bisa membacanya)
+        session(['order_id' => $order->id]);
+        session()->save(); 
+
+        // 3. Matikan Cart
         Cart::deActivateCart();
 
-        session()->flash('order_id', $order->id);
+        // 4. BARU MINTA URL KE PAYMENT GATEWAY
+        // Sekarang aman, karena Order ID sudah ada di Database & Session
+        $redirectUrl = route('shop.checkout.onepage.success');
 
+        try {
+            // Cek apakah payment method punya Redirect URL (Midtrans punya)
+            if ($paymentRedirect = Payment::getRedirectUrl($cart)) {
+                $redirectUrl = $paymentRedirect;
+            }
+        } catch (\Exception $e) {
+            Log::error("Payment Redirect Error: " . $e->getMessage());
+            // Jika gagal ambil URL, tetap arahkan ke success page (fallback)
+        }
+
+        // 5. Return JSON ke Frontend
         return new JsonResource([
             'redirect'     => true,
-            'redirect_url' => route('shop.checkout.onepage.success'),
+            'redirect_url' => $redirectUrl,
         ]);
     }
 

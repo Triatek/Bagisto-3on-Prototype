@@ -257,6 +257,8 @@ return [
         Triatek\RajaOngkir\Providers\RajaOngkirServiceProvider::class,
         // Triatek\RajaOngkirTest\Providers\RajaOngkirTestServiceProvider::class,
 
+        //midtrans
+        Triatek\Midtrans\Providers\MidtransServiceProvider::class,
     ],
 
     /*
@@ -308,7 +310,7 @@ return [
         'URL' => Illuminate\Support\Facades\URL::class,
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
-
+        
     ],
 
 ];
