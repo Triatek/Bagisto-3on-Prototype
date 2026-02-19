@@ -11,6 +11,7 @@ use Webkul\Product\Repositories\ProductCustomizableOptionRepository;
 use Webkul\Sales\Contracts\Order as OrderContract;
 use Webkul\Sales\Generators\OrderSequencer;
 use Webkul\Sales\Models\Order;
+use Webkul\Product\Repositories\ProductInventoryRepository;
 
 class OrderRepository extends Repository
 {
@@ -23,6 +24,7 @@ class OrderRepository extends Repository
         protected OrderItemRepository $orderItemRepository,
         protected ProductCustomizableOptionRepository $productCustomizableOptionRepository,
         protected DownloadableLinkPurchasedRepository $downloadableLinkPurchasedRepository,
+        protected ProductInventoryRepository $productInventoryRepository,
         Container $container
     ) {
         parent::__construct($container);
@@ -52,7 +54,19 @@ class OrderRepository extends Repository
 
             $order = $this->model->create(array_merge($data, ['increment_id' => $this->generateIncrementId()]));
 
+            // --- MODIFIKASI MULAI ---
+            // Cek apakah ada snap_token yang dikirim dari Controller
+            if (isset($data['snap_token'])) {
+                // Jika ada, masukkan ke dalam kolom 'additional'
+                $data['payment']['additional'] = array_merge(
+                    $data['payment']['additional'] ?? [],
+                    ['snap_token' => $data['snap_token']]
+                );
+            }
+            
+            // Simpan data payment (sekarang sudah berisi snap_token)
             $order->payment()->create($data['payment']);
+            // --- MODIFIKASI SELESAI ---
 
             if (isset($data['shipping_address'])) {
                 $order->addresses()->create($data['shipping_address']);
@@ -173,6 +187,28 @@ class OrderRepository extends Repository
 
         return true;
     }
+public function cancelExpiredOrder($order)
+{
+    // Hanya proses jika status masih pending
+    if ($order->status !== 'pending') {
+        return false;
+    }
+
+    // 1. Kembalikan stok menggunakan repository item yang sudah ada
+    foreach ($order->items as $item) {
+        $this->orderItemRepository->returnQtyToProductInventory($item);
+        
+        // Tandai item sebagai dibatalkan
+        $item->qty_canceled = $item->qty_ordered;
+        $item->save();
+    }
+
+    // 2. Ubah status order utama menjadi canceled
+    $order->status = 'canceled';
+    $order->save();
+
+    return $order;
+}
 
     /**
      * Generate increment id.

@@ -157,6 +157,7 @@ Route::prefix('customer')->group(function () {
                 Route::post('cancel/{id}', 'cancel')->name('shop.customers.account.orders.cancel');
 
                 Route::get('print/Invoice/{id}', 'printInvoice')->name('shop.customers.account.orders.print-invoice');
+                Route::get('pay/{id}', 'payNow')->name('shop.customers.orders.pay_now');
             });
 
             /**
