@@ -11,217 +11,50 @@
 
     {!! view_render_event('bagisto.shop.checkout.cart.summary.title.after') !!}
 
-    <!-- Cart Totals -->
+    <v-shipping-estimator 
+        :cart="cart" 
+        @shipping-selected="updateSummaryDisplay"
+    ></v-shipping-estimator>
+
     <div class="mt-6 grid gap-4 max-md:mt-2 max-md:gap-2.5">
-        <!-- Estimate Tax and Shipping -->
-        @if (core()->getConfigData('sales.checkout.shopping_cart.estimate_shipping'))
-            <template v-if="cart.have_stockable_items">
-                @include('shop::checkout.cart.summary.estimate-shipping')
-            </template>
-        @endif
 
-        <!-- Sub Total -->
-        {!! view_render_event('bagisto.shop.checkout.cart.summary.sub_total.before') !!}
-
-        <template v-if="displayTax.subtotal == 'including_tax'">
-            <div class="flex justify-between text-right">
-                <p class="text-base max-sm:text-sm">
-                    @lang('shop::app.checkout.cart.summary.sub-total')
-                </p>
-
-                <p class="text-base font-medium max-sm:text-sm">
-                    @{{ cart.formatted_sub_total_incl_tax }}
-                </p>
-            </div>
-        </template>
-
-        <template v-else-if="displayTax.subtotal == 'both'">
-            <div class="flex justify-between text-right">
-                <p class="text-base max-sm:text-sm">
-                    @lang('shop::app.checkout.cart.summary.sub-total-excl-tax')
-                </p>
-
-                <p class="text-base font-medium max-sm:text-sm">
-                    @{{ cart.formatted_sub_total }}
-                </p>
-            </div>
-            
-            <div class="flex justify-between text-right">
-                <p class="text-base max-sm:text-sm">
-                    @lang('shop::app.checkout.cart.summary.sub-total-incl-tax')
-                </p>
-
-                <p class="text-base font-medium max-sm:text-sm">
-                    @{{ cart.formatted_sub_total_incl_tax }}
-                </p>
-            </div>
-        </template>
-
-        <template v-else>
-            <div class="flex justify-between text-right">
-                <p class="text-base max-sm:text-sm">
-                    @lang('shop::app.checkout.cart.summary.sub-total')
-                </p>
-
-                <p class="text-base font-medium max-sm:text-sm">
-                    @{{ cart.formatted_sub_total }}
-                </p>
-            </div>
-        </template>
-
-        {!! view_render_event('bagisto.shop.checkout.cart.summary.sub_total.after') !!}
-
-        <!-- Discount -->
-        {!! view_render_event('bagisto.shop.checkout.cart.summary.discount_amount.before') !!}
+        <div class="flex justify-between text-right">
+            <p class="text-base max-sm:text-sm">@lang('shop::app.checkout.cart.summary.sub-total')</p>
+            <p class="text-base font-medium max-sm:text-sm">@{{ cart.formatted_sub_total }}</p>
+        </div>
 
         <div 
             class="flex justify-between text-right"
             v-if="cart.discount_amount && parseFloat(cart.discount_amount) > 0"
         >
-            <p class="text-base max-sm:text-sm">
-                @lang('shop::app.checkout.cart.summary.discount-amount')
-            </p>
-
-            <p class="text-base font-medium max-sm:text-sm">
-                @{{ cart.formatted_discount_amount }}
-            </p>
+            <p class="text-base max-sm:text-sm">@lang('shop::app.checkout.cart.summary.discount-amount')</p>
+            <p class="text-base font-medium max-sm:text-sm">@{{ cart.formatted_discount_amount }}</p>
         </div>
 
-        {!! view_render_event('bagisto.shop.checkout.cart.summary.discount_amount.after') !!}
-
-        <!-- Apply Coupon -->
-        {!! view_render_event('bagisto.shop.checkout.cart.summary.coupon.before') !!}
-        
         @include('shop::checkout.coupon')
 
-        {!! view_render_event('bagisto.shop.checkout.cart.summary.coupon.after') !!}
-
-        <!-- Shipping Rates -->
-        {!! view_render_event('bagisto.shop.checkout.onepage.summary.delivery_charges.before') !!}
-        
-        <template v-if="displayTax.shipping == 'including_tax'">
-            <div class="flex justify-between text-right">
-                <p class="text-base max-sm:text-sm">
-                    @lang('shop::app.checkout.cart.summary.delivery-charges')
-                </p>
-
-                <p class="text-base font-medium max-sm:text-sm">
-                    @{{ cart.formatted_shipping_amount_incl_tax }}
-                </p>
-            </div>
-        </template>
-
-        <template v-else-if="displayTax.shipping == 'both'">
-            <div class="flex justify-between text-right">
-                <p class="text-base max-sm:text-sm">
-                    @lang('shop::app.checkout.cart.summary.delivery-charges-excl-tax')
-                </p>
-
-                <p class="text-base font-medium max-sm:text-sm">
-                    @{{ cart.formatted_shipping_amount }}
-                </p>
-            </div>
-            
-            <div class="flex justify-between text-right">
-                <p class="text-base max-sm:text-sm">
-                    @lang('shop::app.checkout.cart.summary.delivery-charges-incl-tax')
-                </p>
-
-                <p class="text-base font-medium max-sm:text-sm">
-                    @{{ cart.formatted_shipping_amount_incl_tax }}
-                </p>
-            </div>
-        </template>
-
-        <template v-else>
-            <div class="flex justify-between text-right">
-                <p class="text-base max-sm:text-sm">
-                    @lang('shop::app.checkout.cart.summary.delivery-charges')
-                </p>
-
-                <p class="text-base font-medium max-sm:text-sm">
-                    @{{ cart.formatted_shipping_amount }}
-                </p>
-            </div>
-        </template>
-
-        {!! view_render_event('bagisto.shop.checkout.onepage.summary.delivery_charges.after') !!}
-
-        <!-- Taxes -->
-        {!! view_render_event('bagisto.shop.checkout.cart.summary.tax.before') !!}
-
-        <div
-            class="flex justify-between text-right"
-            v-if="! cart.tax_total"
-        >
-            <p class="text-base max-md:font-normal max-sm:text-sm">
-                @lang('shop::app.checkout.cart.summary.tax')
-            </p>
-
-            <p class="text-lg font-semibold max-md:text-sm">
-                @{{ cart.formatted_tax_total }}
-            </p>
-        </div>
-
-        <div
-            class="flex flex-col gap-2 border-y py-2"
-            v-else
-        >
-            <div
-                class="flex cursor-pointer justify-between text-right"
-                @click="cart.show_taxes = ! cart.show_taxes"
-            >
-                <p class="text-base max-md:font-normal max-sm:text-sm">
-                    @lang('shop::app.checkout.cart.summary.tax')
-                </p>
-
-                <p class="flex items-center gap-1 text-base font-medium max-md:font-medium max-sm:text-sm">
-                    @{{ cart.formatted_tax_total }}
-                    
-                    <span
-                        class="text-xl"
-                        :class="{'icon-arrow-up': cart.show_taxes, 'icon-arrow-down': ! cart.show_taxes}"
-                    ></span>
-                </p>
-            </div>
-
-            <div
-                class="flex flex-col gap-1"
-                v-show="cart.show_taxes"
-            >
-                <div
-                    class="flex justify-between gap-1 text-right"
-                    v-for="(amount, index) in cart.applied_taxes"
-                >
-                    <p class="text-sm max-md:text-sm max-md:font-normal">
-                        @{{ index }}
-                    </p>
-
-                    <p class="text-sm font-medium max-md:text-sm max-md:font-medium">
-                        @{{ amount }}
-                    </p>
-                </div>
-            </div>
-        </div>
-
-        {!! view_render_event('bagisto.shop.checkout.cart.summary.tax.after') !!}
-   
-        <!-- Cart Grand Total -->
-        {!! view_render_event('bagisto.shop.checkout.cart.summary.grand_total.before') !!}
-
         <div class="flex justify-between text-right">
-            <p class="text-lg font-semibold max-md:text-base">
-                @lang('shop::app.checkout.cart.summary.grand-total')
-            </p>
-
-            <p class="text-lg font-semibold max-md:text-base">
-                @{{ cart.formatted_grand_total }}
+            <p class="text-base max-sm:text-sm">@lang('shop::app.checkout.cart.summary.delivery-charges')</p>
+            
+            <p class="text-base font-medium max-sm:text-sm text-blue-600">
+                <span v-if="customShippingPrice !== null">@{{ customShippingFormatted }}</span>
+                <span v-else>@{{ cart.formatted_shipping_amount }}</span>
             </p>
         </div>
 
-        {!! view_render_event('bagisto.shop.checkout.cart.summary.grand_total.after') !!}
+        <div class="flex justify-between text-right" v-if="cart.tax_total > 0">
+            <p class="text-base max-sm:text-sm">@lang('shop::app.checkout.cart.summary.tax')</p>
+            <p class="text-base font-medium max-sm:text-sm">@{{ cart.formatted_tax_total }}</p>
+        </div>
 
-        {!! view_render_event('bagisto.shop.checkout.cart.summary.proceed_to_checkout.before') !!}
+        <div class="flex justify-between text-right border-t pt-4">
+            <p class="text-lg font-semibold max-md:text-base">@lang('shop::app.checkout.cart.summary.grand-total')</p>
+            
+            <p class="text-lg font-semibold max-md:text-base">
+                <span v-if="customGrandTotalFormatted">@{{ customGrandTotalFormatted }}</span>
+                <span v-else>@{{ cart.formatted_grand_total }}</span>
+            </p>
+        </div>
 
         <a
             href="{{ route('shop.checkout.onepage.index') }}"
@@ -229,7 +62,215 @@
         >
             @lang('shop::app.checkout.cart.summary.proceed-to-checkout')
         </a>
-
-        {!! view_render_event('bagisto.shop.checkout.cart.summary.proceed_to_checkout.after') !!}
     </div>
 </div>
+
+@pushOnce('scripts')
+<script type="text/x-template" id="v-shipping-estimator-template">
+        <div class="border rounded-lg p-4 bg-gray-50 mb-4">
+            <p class="font-medium text-gray-800 mb-3 text-lg">Cek Ongkos Kirim</p>
+            
+            <div class="mb-3">
+                <label class="block text-sm text-gray-600 mb-1">Negara</label>
+                <select v-model="address.country" class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white">
+                    <option value="ID">Indonesia</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="block text-sm text-gray-600 mb-1">Provinsi</label>
+                <select 
+                    v-model="address.state" 
+                    @change="handleProvinceChange" 
+                    class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white"
+                >
+                    <option value="" disabled>Pilih Provinsi</option>
+                    <option v-for="prov in provinces" :key="prov.code" :value="prov.name">
+                        @{{ prov.name }}
+                    </option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="block text-sm text-gray-600 mb-1">Kota / Kabupaten</label>
+                <select 
+                    v-model="address.city" 
+                    :disabled="cities.length === 0"
+                    @change="calculateShipping" 
+                    class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white disabled:bg-gray-100"
+                >
+                    <option value="" disabled>@{{ isFetchingCities ? 'Memuat...' : 'Pilih Kota' }}</option>
+                    <option v-for="city in cities" :key="city.code" :value="city.name">
+                        @{{ city.name }}
+                    </option>
+                </select>
+            </div>
+
+<div class="mb-3">
+                 <label class="block text-sm text-gray-600 mb-1">Kode Pos</label>
+                 <input 
+                    type="text" 
+                    v-model="address.postcode" 
+                    @input="handlePostcodeInput"
+                    maxlength="5"
+                    class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm" 
+                    placeholder="Contoh: 40123"
+                 >
+                 </div>
+
+            <div v-if="isLoading" class="text-center text-sm text-gray-500 py-2">
+                <span class="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900 mr-2"></span>
+                Menghitung ongkir...
+            </div>
+
+            <p v-if="errorMessage" class="text-red-500 text-xs mb-2">@{{ errorMessage }}</p>
+
+            <div v-if="shippingMethods.length > 0" class="border-t pt-3 mt-2">
+                <label class="block text-sm font-bold text-blue-700 mb-2">Pilih Layanan Pengiriman:</label>
+                
+                <select 
+                    v-model="selectedRate" 
+                    @change="applyShipping"
+                    class="w-full rounded-md border-2 border-blue-500 bg-blue-50 px-3 py-2 text-sm font-medium focus:ring-blue-500"
+                >
+                    <option :value="null">-- Pilih Ekspedisi --</option>
+                    <optgroup v-for="method in shippingMethods" :label="method.carrier_title">
+                        <option v-for="rate in method.rates" :value="rate">
+                            @{{ rate.method_title }} - @{{ formatPrice(rate.price) }}
+                        </option>
+                    </optgroup>
+                </select>
+            </div>
+        </div>
+    </script>
+
+    <script type="module">
+        app.component('v-shipping-estimator', {
+            template: '#v-shipping-estimator-template',
+            props: ['cart'],
+            emits: ['shipping-selected'], // Event ke parent
+            
+            data() {
+                return {
+                    address: {
+                        country: 'ID',
+                        state: '',
+                        city: '',
+                        postcode: ''
+                    },
+                    provinces: [],
+                    cities: [],
+                    isFetchingCities: false,
+                    isLoading: false,
+                    shippingMethods: [],
+                    selectedRate: null,
+                    errorMessage: ''
+                }
+            },
+
+            created() {
+                this.fetchProvinces();
+            },
+
+            methods: {
+                // --- API LOGIC (Sama seperti Checkout) ---
+                async fetchProvinces() {
+                    try {
+                        const response = await this.$axios.get('/indo-region/provinces');
+                        this.provinces = response.data;
+                    } catch (e) {}
+                },
+
+                async fetchCities(provinceCode) {
+                    this.isFetchingCities = true;
+                    this.cities = [];
+                    this.address.city = '';
+                    try {
+                        const response = await this.$axios.get('/indo-region/cities/' + provinceCode);
+                        this.cities = response.data;
+                    } catch (e) {
+                    } finally {
+                        this.isFetchingCities = false;
+                    }
+                },
+
+                    handleProvinceChange(event) {
+                        const selectedName = event.target.value;
+                        const selectedProvObj = this.provinces.find(p => p.name === selectedName);
+                        
+                        // Reset Ongkir Lama & Pilihan Kota saat ganti Provinsi
+                        this.shippingMethods = [];
+                        this.selectedRate = null;
+                        this.$emit('shipping-selected', null);
+                        
+                        if (selectedProvObj) this.fetchCities(selectedProvObj.code);
+                    },
+                    handlePostcodeInput() {
+                    // 1. Pastikan hanya angka (Hapus huruf jika ada yang iseng ngetik huruf)
+                    this.address.postcode = this.address.postcode.replace(/[^0-9]/g, '');
+
+                    // 2. Cek apakah panjangnya sudah pas 5 digit?
+                    if (this.address.postcode.length === 5) {
+                        // Jika sudah 5, langsung tembak API!
+                        this.calculateShipping();
+                    }
+                },
+
+                // --- HITUNG ONGKIR LOGIC ---
+                calculateShipping() {
+                    // Validasi: Jangan hitung jika Kota belum dipilih
+                    if (!this.address.city) return;
+
+                    this.isLoading = true;
+                    this.errorMessage = '';
+                    this.shippingMethods = [];
+                    this.selectedRate = null;
+                    
+                    this.$emit('shipping-selected', null);
+
+                    this.$axios.post("{{ route('shop.api.checkout.cart.estimate_shipping') }}", this.address)
+                        .then(response => {
+                            this.isLoading = false;
+                            const result = response.data.data;
+                            
+                            if (result.shipping_methods) {
+                                this.shippingMethods = result.shipping_methods;
+                            } else {
+                                this.shippingMethods = [];
+                            }
+                        })
+                        .catch(error => {
+                            this.isLoading = false;
+                            // Silent error atau tampilkan pesan kecil jika perlu
+                            // this.errorMessage = error.response?.data?.message; 
+                        });
+                },
+                applyShipping() {
+                    // Kirim data tarif yang dipilih ke Parent (Summary)
+                    if (this.selectedRate) {
+                        this.$emit('shipping-selected', this.selectedRate);
+                    }
+                },
+
+                formatPrice(price) {
+                    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(price);
+                }
+            }
+        });
+    </script>
+
+    <script type="module">
+        // Kita tidak bisa mengedit v-cart langsung dari sini tanpa build.
+        // TAPI, kita bisa memanipulasi tampilan summary menggunakan event listener Vue.
+        // Di sini kita gunakan trik: Component Estimator di atas emit event, 
+        // Component Parent (Summary HTML) menangkapnya lewat variabel global sementara atau mixin.
+        
+        // Agar lebih bersih, kita tambahkan method 'updateSummaryDisplay' di root app mixin 
+        // atau kita handle manual di template v-cart jika memungkinkan.
+        
+        // SOLUSI: Karena kita tidak bisa ubah parent v-cart, 
+        // Kita pasang logic penerima event langsung di tag <v-shipping-estimator>
+        // Lalu kita simpan data 'customShippingPrice' di komponen v-cart LEWAT PROPERTI TAMBAHAN (Monkey Patch)
+        // ATAU kita gunakan event bus sederhana.
+    </script>
+@endPushOnce

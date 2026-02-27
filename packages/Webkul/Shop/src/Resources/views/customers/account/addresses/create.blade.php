@@ -46,25 +46,6 @@
                 <x-shop::form :action="route('shop.customers.account.addresses.store')">
                     {!! view_render_event('bagisto.shop.customers.account.addresses.create_form_controls.before') !!}
 
-                    <!--Company Name -->
-                    <x-shop::form.control-group>
-                        <x-shop::form.control-group.label>
-                            @lang('shop::app.customers.account.addresses.create.company-name')
-                        </x-shop::form.control-group.label>
-            
-                        <x-shop::form.control-group.control
-                            type="text"
-                            name="company_name"
-                            :value="old('company_name')"
-                            :label="trans('shop::app.customers.account.addresses.create.company-name')"
-                            :placeholder="trans('shop::app.customers.account.addresses.create.company-name')"
-                        />
-            
-                        <x-shop::form.control-group.error control-name="company_name" />
-                    </x-shop::form.control-group>
-
-                    {!! view_render_event('bagisto.shop.customers.account.addresses.create_form_controls.company_name.after') !!}
-
                     <!-- First Name -->
                     <x-shop::form.control-group>
                         <x-shop::form.control-group.label class="required">
@@ -104,45 +85,6 @@
                     </x-shop::form.control-group>
 
                     {!! view_render_event('bagisto.shop.customers.account.addresses.create_form_controls.last_name.after') !!}
-
-                    <!-- E-mail -->
-                    <x-shop::form.control-group>
-                        <x-shop::form.control-group.label class="required">
-                            @lang('shop::app.customers.account.addresses.create.email')
-                        </x-shop::form.control-group.label>
-
-                        <x-shop::form.control-group.control
-                            type="text"
-                            name="email"
-                            rules="required|email"
-                            :value="old('email')"
-                            :label="trans('shop::app.customers.account.addresses.create.email')"
-                            :placeholder="trans('shop::app.customers.account.addresses.create.email')"
-                        />
-
-                        <x-shop::form.control-group.error control-name="email" />
-                    </x-shop::form.control-group>
-
-                    {!! view_render_event('bagisto.shop.customers.account.addresses.create_form_controls.email.after') !!}
-
-                    <!-- Vat Id -->
-                    <x-shop::form.control-group>
-                        <x-shop::form.control-group.label>
-                            @lang('shop::app.customers.account.addresses.create.vat-id')
-                        </x-shop::form.control-group.label>
-
-                        <x-shop::form.control-group.control
-                            type="text"
-                            name="vat_id"
-                            :value="old('vat_id')"
-                            :label="trans('shop::app.customers.account.addresses.create.vat-id')"
-                            :placeholder="trans('shop::app.customers.account.addresses.create.vat-id')"
-                        />
-
-                        <x-shop::form.control-group.error control-name="vat_id" />
-                    </x-shop::form.control-group>
-
-                    {!! view_render_event('bagisto.shop.customers.account.addresses.create_form_controls.vat_id.after') !!}
 
                     <!-- Street Address -->
                     <x-shop::form.control-group>

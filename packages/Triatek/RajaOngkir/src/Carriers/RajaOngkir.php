@@ -15,7 +15,6 @@ class RajaOngkir extends AbstractShipping
 {
     protected $code = 'rajaongkir';
     
-    // Wajib untuk PHP 8.2
     public $rates = [];
 
     public function isAvailable()
@@ -28,19 +27,55 @@ class RajaOngkir extends AbstractShipping
         $cart = Cart::getCart();
         if (! $cart) return false;
 
-        // Setting API
-        $apiKey = 'P4mpsCWya3a97dfb92531eebI81HdUUH'; 
-        $origin = 152; 
-        $destinationId = 152; 
+        // 1. AMBIL ALAMAT TUJUAN
+        $shippingAddress = $cart->shipping_address;
 
-        // 1. DAFTAR KURIR YANG DIINGINKAN SAJA
-        // Hapus 'pos' dan 'tiki' dari sini
-        $listKurir = ['jne', 'jnt', 'sicepat', 'ninja'];
+        if (!$shippingAddress || !$shippingAddress->city) {
+            return false;
+        }
 
+        // ==================================================================
+        // KONFIGURASI (DARI ADMIN PANEL / ENV)
+        // ==================================================================
+        
+        // 1. Cek di Admin Panel -> Configure -> Sales -> Shipping Methods -> RajaOngkir
+        // 2. Jika kosong, cek file .env
+        $apiKey = core()->getConfigData('sales.carriers.rajaongkir.api_key') ?: env('RAJAONGKIR_API_KEY');
+        $origin = core()->getConfigData('sales.carriers.rajaongkir.origin_city') ?: env('RAJAONGKIR_ORIGIN_ID');
+
+        // Validasi: Jika konfigurasi belum diisi, stop proses agar tidak error
+        if (empty($apiKey) || empty($origin)) {
+            // Opsional: Log error untuk debugging
+            // Log::error('RajaOngkir: API Key atau Origin belum disetting di Admin/Env.');
+            return false;
+        }
+
+        // ==================================================================
+        
+        // 2. CARI ID KOTA TUJUAN
+        $destinationId = $this->getCityId($shippingAddress->city, $apiKey);
+
+        if (!$destinationId) {
+            return false;
+        }
+
+        $listKurir = [
+            'jne', 
+            'pos', 
+            'tiki', 
+            'sicepat', 
+            'jnt', 
+            'anteraja'
+        ];
+
+        // --- HITUNG BERAT ---
         $totalWeight = 0;
         foreach ($cart->items as $item) {
-            $totalWeight += $item->total_weight > 0 ? $item->total_weight : 1000; 
+            $beratItem = $item->total_weight > 0 ? $item->total_weight : 1; 
+            $totalWeight += $beratItem;
         }
+        $weightInGrams = $totalWeight * 1000;
+        // -----------------------
 
         foreach ($listKurir as $kurir) {
             try {
@@ -53,7 +88,7 @@ class RajaOngkir extends AbstractShipping
                     'originType'      => 'city', 
                     'destination'     => $destinationId,
                     'destinationType' => 'city', 
-                    'weight'          => $totalWeight * 1000, 
+                    'weight'          => $weightInGrams, 
                     'courier'         => $kurir, 
                 ]);
 
@@ -61,31 +96,41 @@ class RajaOngkir extends AbstractShipping
 
                 if (isset($body['data']) && !empty($body['data'])) {
                     foreach ($body['data'] as $cost) {
+                        if ($cost['cost'] <= 0) continue;
+
+                        // ======================================================
+                        // BAGIAN FILTER: HANYA REGULER (BLACKLIST CARGO)
+                        // ======================================================
                         
+                        $serviceCode = strtoupper($cost['service']); 
+                        
+                        // DAFTAR BLACKLIST 
+                        $blockedServices = [
+                            'JTR', 'TRUCKING', 'GOKIL', 'CARGO', 'ECO', 'HALU', 'OKE'
+                        ];
+
+                        if (in_array($serviceCode, $blockedServices)) {
+                            continue; 
+                        }
+
+                        if (str_contains(strtoupper($cost['description']), 'CARGO') || str_contains(strtoupper($cost['description']), 'TRUCK')) {
+                            continue;
+                        }
+
+                        // ======================================================
+                        // AKHIR FILTER
+                        // ======================================================
+
                         $object = new CartShippingRate;
                         $object->carrier = 'rajaongkir';
                         
-// --- MEMBUAT LOGO ---
                         $imgUrl = asset('images/' . $kurir . '.png');
-                        
-                        // PERUBAHAN DISINI:
-                        // 1. Pakai 'height: 40px' (biar tingginya sama rata semua)
-                        // 2. Hapus 'width' (biar proporsional, gak gepeng)
-                        // 3. Tambah 'margin-bottom' biar gak nempel sama harga
-                        $logoHtml = "<img src='$imgUrl' style='height: 40px; width: auto; object-fit: contain; display: block; margin-bottom: 8px;'>";
+                        $logoHtml = "<img src='$imgUrl' style='height: 30px; width: auto; display: block; margin-bottom: 5px;'>";
 
-                        // Kita Hapus teks nama kurir, biar cuma LOGO aja yang tampil (lebih bersih)
-                        // Atau kalau mau tetap ada teks, taruh di bawahnya
                         $object->carrier_title = $logoHtml;
-                        
                         $object->method = 'rajaongkir_' . $kurir . '_' . $cost['service'];
-                        
-                        // Judul Service (misal: REGULER)
-                        $object->method_title = $cost['service']; 
-                        
-                        // Deskripsi
-                        $object->method_description = $cost['description'] . ' (' . $cost['etd'] . ')';
-                        
+                        $object->method_title = strtoupper($kurir) . ' - ' . $cost['service']; 
+                        $object->method_description = $cost['description'] . ' (' . $cost['etd'] . ' hari)';
                         $object->price = $cost['cost'];
                         $object->base_price = $cost['cost'];
                         
@@ -94,7 +139,6 @@ class RajaOngkir extends AbstractShipping
                 }
 
             } catch (\Exception $e) {
-                // Lanjut ke kurir berikutnya
                 continue;
             }
         }
@@ -102,10 +146,27 @@ class RajaOngkir extends AbstractShipping
         return $this->rates;
     }
 
-    // Fungsi getCityId biarkan saja di bawah sini (untuk pengembangan nanti)
+    // --- FUNGSI PENCARI ID KOTA ---
     private function getCityId($cityName, $apiKey)
     {
-        // ... (kode sama seperti sebelumnya) ...
-        return null;
+        return Cache::remember('city_id_' . Str::slug($cityName), 60 * 24, function () use ($cityName, $apiKey) {
+            try {
+                $response = Http::withoutVerifying()->withHeaders([
+                    'key' => $apiKey
+                ])->get('https://rajaongkir.komerce.id/api/v1/destination/domestic-destination', [
+                    'search' => $cityName 
+                ]);
+
+                $body = $response->json();
+
+                if (isset($body['data']) && count($body['data']) > 0) {
+                    return $body['data'][0]['id']; 
+                }
+
+            } catch (\Exception $e) {
+                return null;
+            }
+            return null;
+        });
     }
 }

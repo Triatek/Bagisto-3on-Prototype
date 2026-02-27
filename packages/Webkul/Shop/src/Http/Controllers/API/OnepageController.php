@@ -4,6 +4,7 @@ namespace Webkul\Shop\Http\Controllers\API;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log; // Tambahan Log
 use Webkul\Checkout\Facades\Cart;
 use Webkul\Customer\Repositories\CustomerRepository;
 use Webkul\Payment\Facades\Payment;
@@ -143,9 +144,11 @@ class OnepageController extends APIController
 
     /**
      * Store order
+     * MODIFIED FOR MIDTRANS FIX
      */
-    public function storeOrder()
+public function storeOrder()
     {
+        // 1. Validasi awal keranjang
         if (Cart::hasError()) {
             return new JsonResource([
                 'redirect'     => true,
@@ -165,24 +168,58 @@ class OnepageController extends APIController
 
         $cart = Cart::getCart();
 
-        if ($redirectUrl = Payment::getRedirectUrl($cart)) {
-            return new JsonResource([
-                'redirect'     => true,
-                'redirect_url' => $redirectUrl,
-            ]);
-        }
-
+        // 2. Buat Order di Database
         $data = (new OrderResource($cart))->jsonSerialize();
-
         $order = $this->orderRepository->create($data);
 
+        // 3. Simpan ID ke Session (Penting agar halaman Success bisa tampil)
+        session(['order_id' => $order->id]);
+        session()->save(); 
+
+        // 4. Matikan Cart (Keranjang jadi kosong setelah order dibuat)
         Cart::deActivateCart();
 
-        session()->flash('order_id', $order->id);
+        // 5. Tentukan URL Pengalihan (Default ke halaman sukses)
+        $redirectUrl = route('shop.checkout.onepage.success');
 
+        try {
+            // Ambil URL Pembayaran dari Plugin (Midtrans)
+            if ($paymentRedirect = Payment::getRedirectUrl($cart)) {
+                $redirectUrl = $paymentRedirect;
+
+                /**
+                 * LOGIKA PAY NOW:
+                 * Midtrans memberikan URL seperti: https://app.sandbox.midtrans.com/snap/v2/vtweb/TOKEN_DISINI
+                 * Kita pecah URL-nya untuk mengambil TOKEN tersebut.
+                 */
+                $urlParts = explode('/', $paymentRedirect);
+                $snapToken = end($urlParts);
+
+                // Jika token berhasil didapat, simpan ke database order_payments
+                if ($order->payment && ! empty($snapToken)) {
+                    $payment = $order->payment;
+                    
+                    // Ambil data additional yang sudah ada (jika ada)
+                    $additional = $payment->additional ?? [];
+                    
+                    // Masukkan snap_token ke dalam array
+                    $additional['snap_token'] = $snapToken;
+                    
+                    // Update data payment
+                    $payment->additional = $additional;
+                    $payment->save();
+
+                    Log::info("Snap Token Berhasil Disimpan: " . $snapToken . " untuk Order #" . $order->id);
+                }
+            }
+        } catch (\Exception $e) {
+            Log::error("Gagal mendapatkan URL Pembayaran: " . $e->getMessage());
+        }
+
+        // 6. Kirim respon ke Frontend (Vue.js)
         return new JsonResource([
             'redirect'     => true,
-            'redirect_url' => route('shop.checkout.onepage.success'),
+            'redirect_url' => $redirectUrl,
         ]);
     }
 

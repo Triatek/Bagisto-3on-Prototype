@@ -454,7 +454,7 @@
             app.component("v-cart", {
                 template: '#v-cart-template',
 
-                data() {
+data() {
                     return  {
                         cart: [],
 
@@ -466,15 +466,18 @@
 
                         displayTax: {
                             prices: "{{ core()->getConfigData('sales.taxes.shopping_cart.display_prices') }}",
-
                             subtotal: "{{ core()->getConfigData('sales.taxes.shopping_cart.display_subtotal') }}",
-
                             shipping: "{{ core()->getConfigData('sales.taxes.shopping_cart.display_shipping_amount') }}",
                         },
 
                         isLoading: true,
 
                         isStoring: false,
+
+                        // --- TAMBAHKAN 3 BARIS INI ---
+                        customShippingPrice: null,      // Menyimpan harga ongkir (angka)
+                        customShippingFormatted: null,  // Menyimpan harga ongkir (teks Rp)
+                        customGrandTotalFormatted: null // Menyimpan Grand Total baru
                     }
                 },
 
@@ -489,11 +492,56 @@
                 },
 
                 methods: {
+                    // ============================================================
+                    //  METHOD BARU: UPDATE TAMPILAN SUMMARY (ONGKIR & TOTAL)
+                    // ============================================================
+                    updateSummaryDisplay(rate) {
+                        // 1. Jika user mereset pilihan
+                        if (!rate) {
+                            this.customShippingPrice = null;
+                            this.customShippingFormatted = null;
+                            this.customGrandTotalFormatted = null;
+                            return;
+                        }
+
+                        // 2. Simpan Data Ongkir Baru
+                        this.customShippingPrice = rate.price;
+                        
+                        // PERBAIKAN: Format Rupiah secara manual (Lebih Aman)
+                        // Daripada mengandalkan rate.formated_price yang kadang undefined
+                        this.customShippingFormatted = new Intl.NumberFormat('id-ID', { 
+                            style: 'currency', 
+                            currency: 'IDR',
+                            minimumFractionDigits: 0,
+                            maximumFractionDigits: 0
+                        }).format(rate.price);
+
+                        // 3. Hitung Ulang Grand Total
+                        let baseGrandTotal = parseFloat(this.cart.grand_total);
+                        let baseShipping = 0;
+                        
+                        if (this.cart.selected_shipping_rate) {
+                            baseShipping = parseFloat(this.cart.selected_shipping_rate.price);
+                        }
+
+                        let newTotal = (baseGrandTotal - baseShipping) + rate.price;
+
+                        // 4. Format Grand Total
+                        this.customGrandTotalFormatted = new Intl.NumberFormat('id-ID', { 
+                            style: 'currency', 
+                            currency: 'IDR',
+                            minimumFractionDigits: 0,
+                            maximumFractionDigits: 0
+                        }).format(newTotal);
+                    },
+
+                    // ============================================================
+                    //  METHOD BAWAAN BAGISTO (JANGAN DIHAPUS)
+                    // ============================================================
                     getCart() {
                         this.$axios.get('{{ route('shop.api.checkout.cart.index') }}')
                             .then(response => {
                                 this.cart = response.data.data;
-
                                 this.isLoading = false;
 
                                 if (response.data.message) {
@@ -524,14 +572,11 @@
                             .then(response => {
                                 if (response.data.message) {
                                     this.cart = response.data.data;
-
                                     this.$emitter.emit('add-flash', { type: 'success', message: response.data.message });
                                 } else {
                                     this.$emitter.emit('add-flash', { type: 'warning', message: response.data.data.message });
                                 }
-
                                 this.isStoring = false;
-
                             })
                             .catch(error => {
                                 this.isStoring = false;
@@ -551,9 +596,7 @@
                                     })
                                     .then(response => {
                                         this.cart = response.data.data;
-
                                         this.$emitter.emit('add-flash', { type: 'success', message: response.data.message });
-
                                     })
                                     .catch(error => {});
                             }
@@ -571,11 +614,8 @@
                                     })
                                     .then(response => {
                                         this.cart = response.data.data;
-
                                         this.$emitter.emit('update-mini-cart', response.data.data );
-
                                         this.$emitter.emit('add-flash', { type: 'success', message: response.data.message });
-
                                     })
                                     .catch(error => {});
                             }
@@ -586,7 +626,6 @@
                         this.$emitter.emit('open-confirm-modal', {
                             agree: () => {
                                 const selectedItemsIds = this.cart.items.flatMap(item => item.selected ? item.id : []);
-
                                 const selectedItemsQty = this.cart.items.filter(item => item.selected).map(item => this.applied.quantity[item.id] ?? item.quantity);
 
                                 this.$axios.post('{{ route('shop.api.checkout.cart.move_to_wishlist') }}', {
@@ -595,11 +634,8 @@
                                     })
                                     .then(response => {
                                         this.cart = response.data.data;
-
                                         this.$emitter.emit('update-mini-cart', response.data.data );
-
                                         this.$emitter.emit('add-flash', { type: 'success', message: response.data.message });
-
                                     })
                                     .catch(error => {});
                             }

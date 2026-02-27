@@ -52,5 +52,38 @@ return [
                 'info'          => 'ID Kota (Angka) contoh: 152'
             ],
         ]
-    ]
+    ],
+    [
+        'key'    => 'sales.carriers.rajaongkir',
+        'name'   => 'Raja Ongkir',
+        'info'   => 'Raja Ongkir Third API',
+        'sort'   => 1,
+        'fields' => [
+            // ... field lain (title, description, active) ...
+            [
+                'name'          => 'api_key', // <--- Ini yang dibaca kode tadi
+                'title'         => 'API Key',
+                'type'          => 'text',
+                'validation'    => 'required',
+                'channel_based' => true,
+                'locale_based'  => false,
+            ],
+            [
+                'name'          => 'origin_city', // <--- Ini yang dibaca kode tadi (ID Kota Asal)
+                'title'         => 'Origin City ID (Angka)',
+                'type'          => 'text',
+                'validation'    => 'required|numeric',
+                'channel_based' => true,
+                'locale_based'  => false,
+            ],
+            [
+                'name'          => 'active', // <--- Ini yang dibaca kode tadi (ID Kota Asal)
+                'title'         => 'Status',
+                'type'          => 'boolean',
+                'validation'    => 'required|bool',
+                'channel_based' => true,
+                'locale_based'  => false,
+            ],
+        ],
+    ],
 ];

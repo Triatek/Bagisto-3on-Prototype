@@ -288,8 +288,8 @@
         <x-shop::shimmer.products.view />
     </v-product>
 
-    <div class="container-fluid" style="max-width: 100%; overflow-x: hidden;">
-        
+        <div class="container-fluid" style="max-width: 100%; overflow-x: hidden;">
+
         {{-- BANNER HOTSPOT --}}
         <div class="custom-promo-banner">
             <div class="cpb-left">
@@ -453,7 +453,15 @@
                                 <div class="marketing-box mt-4">
                                     <div class="flex items-center gap-2 text-zinc-500 text-sm mb-3"><span class="icon-eye text-lg"></span> <span><strong id="view-count">24</strong> people are viewing this right now</span></div>
                                     @if ($isPromoActive)<div class="countdown-timer-box rounded"><span>Hurry up! Sale ends in:</span><span id="standard-timer" class="text-lg font-bold">Loading...</span></div>@endif
-                                    @if ($inventory > 0 && $inventory < $lowStockThreshold)<div class="mb-4"><p class="text-sm text-zinc-600 mb-1">Only <strong class="text-red-600">{{ $inventory }} item(s)</strong> left in stock!</p><div class="stock-bar-bg"><div class="stock-bar-fill" style="width: {{ $stockPercent }}%"></div></div></div>@endif
+                                    @if ($product->manage_stock > 0 && $inventory > 0 && $inventory < $lowStockThreshold)
+                                        <div class="mb-4">
+                                            <p class="text-sm text-zinc-600 mb-1">Only <strong class="text-red-600">{{ $inventory }} item(s)</strong> left in stock!</p>
+                                            <div class="stock-bar-bg">
+                                                <div class="stock-bar-fill" style="width: {{ $stockPercent }}%">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
                                 </div>
                                 @include('shop::products.view.types.configurable')
                                 @include('shop::products.view.types.simple')
@@ -509,9 +517,16 @@
                                     </div>
                                     <span class="payment-label">Guarantee safe & secure checkout</span>
                                 </div>
-
                             </div>
                         </div>
+                        <div class="mt-12 border-t border-gray-200 pt-10" id="review-section" style="width: 100%;">
+                        <h2 class="text-3xl font-bold mb-8 text-center" style="font-family: 'Times New Roman', serif; text-transform: uppercase;">
+                            Customer Reviews
+                        </h2>
+                        
+                        {{-- Panggil Review Bagisto --}}
+                        @include('shop::products.view.reviews')
+                    </div>
                     </div>
                 </form>
             </x-shop::form>
@@ -522,7 +537,7 @@
                 template: '#v-product-template',
                 data() { return { isWishlist: Boolean("{{ (boolean) auth()->guard()->user()?->wishlist_items->where('channel_id', core()->getCurrentChannel()->id)->where('product_id', $product->id)->count() }}"), isCustomer: '{{ auth()->guard('customer')->check() }}', is_buy_now: 0, isStoring: { addToCart: false, buyNow: false }, } },
                 methods: {
-                    addToCart(params) { const operation = this.is_buy_now ? 'buyNow' : 'addToCart'; this.isStoring[operation] = true; let formData = new FormData(this.$refs.formData); this.ensureQuantity(formData); this.$axios.post('{{ route("shop.api.checkout.cart.store") }}', formData, { headers: { 'Content-Type': 'multipart/form-data' } }).then(response => { if (response.data.message) { this.$emitter.emit('update-mini-cart', response.data.data); this.$emitter.emit('add-flash', { type: 'success', message: response.data.message }); if (response.data.redirect) window.location.href= response.data.redirect; } else { this.$emitter.emit('add-flash', { type: 'warning', message: response.data.data.message }); } this.isStoring[operation] = false; }).catch(error => { this.isStoring[operation] = false; this.$emitter.emit('add-flash', { type: 'warning', message: error.response.data.message }); }); },
+                    addToCart(params) { if (this.isCustomer) { const operation = this.is_buy_now ? 'buyNow' : 'addToCart'; this.isStoring[operation] = true; let formData = new FormData(this.$refs.formData); this.ensureQuantity(formData); this.$axios.post('{{ route("shop.api.checkout.cart.store") }}', formData, { headers: { 'Content-Type': 'multipart/form-data' } }).then(response => { if (response.data.message) { this.$emitter.emit('update-mini-cart', response.data.data); this.$emitter.emit('add-flash', { type: 'success', message: response.data.message }); if (response.data.redirect) window.location.href= response.data.redirect; } else { this.$emitter.emit('add-flash', { type: 'warning', message: response.data.data.message }); } this.isStoring[operation] = false; }).catch(error => { this.isStoring[operation] = false; this.$emitter.emit('add-flash', { type: 'warning', message: error.response.data.message }); }); } else { let url = new URL(`${window.location.origin}/customer/login`); window.location.href = url.href; } },
                     addToWishlist() { if (this.isCustomer) { this.$axios.post('{{ route('shop.api.customers.account.wishlist.store') }}', { product_id: "{{ $product->id }}" }).then(response => { this.isWishlist = ! this.isWishlist; this.$emitter.emit('add-flash', { type: 'success', message: response.data.data.message }); }).catch(error => {}); } else { window.location.href = "{{ route('shop.customer.session.index')}}"; } },
                     addToCompare(productId) { this.$axios.post('{{ route("shop.api.compare.store") }}', { product_id: productId }).then(response => { this.$emitter.emit('add-flash', { type: 'success', message: response.data.data.message }); }).catch(error => { this.$emitter.emit('add-flash', { type: 'error', message: error.response.data.message }); }); },
                     ensureQuantity(formData) { if (! formData.has('quantity')) formData.append('quantity', 1); },
