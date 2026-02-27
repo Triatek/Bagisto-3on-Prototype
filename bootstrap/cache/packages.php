@@ -1,4 +1,12 @@
 <?php return array (
+  'akara/bagisto-midtrans-payment' => 
+  array (
+    'providers' => 
+    array (
+      0 => 'Akara\\MidtransPayment\\Providers\\MidtransServiceProvider',
+      1 => 'Akara\\MidtransPayment\\Providers\\MidtransEventServiceProvider',
+    ),
+  ),
   'astrotomic/laravel-translatable' => 
   array (
     'providers' => 

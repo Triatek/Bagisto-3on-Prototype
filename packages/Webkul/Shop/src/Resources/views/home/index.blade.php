@@ -92,11 +92,20 @@
                 @break
 
             @case($customization::CATEGORY_CAROUSEL)
+            <div id="koleksi-kategori" style="scroll-margin-top: 100px;">
                 <x-shop::categories.carousel
                     :title="$data['title'] ?? ''"
                     :src="route('shop.api.categories.index', $data['filters'] ?? [])"
                     :navigation-link="route('shop.home.index')"
                     aria-label="Category Carousel"
+                />
+                </div>
+                @break
+                @case($customization::PRODUCT_CAROUSEL)
+                <x-shop::products.carousel
+                    :title="$data['title'] ?? ''"
+                    :src="route('shop.api.products.index', $data['filters'] ?? [])"
+                    :navigation-link="route('shop.home.index')"
                 />
                 @break
         @endswitch

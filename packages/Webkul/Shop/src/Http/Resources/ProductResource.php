@@ -29,11 +29,15 @@ class ProductResource extends JsonResource
     public function toArray($request)
     {
         $productTypeInstance = $this->getTypeInstance();
+        $realProduct = $this->product ?? $this;
+        
+        $firstCategory = $realProduct->categories->first();
 
         return [
             'id'          => $this->id,
             'sku'         => $this->sku,
             'name'        => $this->name,
+            'category_name' => $firstCategory ? $firstCategory->name : 'Produk',
             'description' => $this->description,
             'url_key'     => $this->url_key,
             'base_image'  => product_image()->getProductBaseImage($this),
