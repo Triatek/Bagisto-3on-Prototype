@@ -4,6 +4,57 @@
     navigation-link="{{ $navigationLink ?? '' }}"
 >
     <x-shop::shimmer.products.carousel :navigation-link="$navigationLink ?? false" />
+@pushOnce('styles')
+    <style>
+        /* --- CSS Grid Produk --- */
+        .custom-product-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+        }
+        @media (max-width: 1024px) {
+            .custom-product-grid { grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+        }
+        @media (max-width: 768px) {
+            .custom-product-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+        }
+
+        /* --- CSS Judul ala New Arrivals --- */
+        .na-header {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+        .na-title {
+            font-size: 48px;
+            font-weight: 700;
+            color: #000033;
+            font-family: 'Playfair Display', serif;
+            margin: 0;
+            line-height: 1;
+            z-index: 2;
+            position: relative;
+        }
+        .na-underline {
+            display: block;
+            width: 250px; /* Diperlebar sedikit agar muat untuk kata "New Products" */
+            height: 18px;
+            background-color: #FFF9C4;
+            margin-top: -12px;
+            border-radius: 50%;
+            transform: rotate(-2deg);
+            z-index: 1;
+        }
+        
+        /* Penyesuaian Judul di HP */
+        @media (max-width: 768px) {
+            .na-title { font-size: 32px; }
+            .na-underline { width: 170px; height: 14px; margin-top: -8px; }
+        }
+    </style>
+@endPushOnce
 </v-products-carousel>
 
 @pushOnce('scripts')
@@ -15,55 +66,29 @@
             class="container mt-20 max-lg:px-8 max-md:mt-8 max-sm:mt-7 max-sm:!px-4"
             v-if="! isLoading && products.length"
         >
-            <div class="flex justify-between">
-                <h2 class="font-dmserif text-3xl max-md:text-2xl max-sm:text-xl">
-                    @{{ title }}
-                </h2>
+            <div class="relative flex justify-center items-center mb-10 mt-5">
+                <div class="na-header">
+                    <h2 class="na-title max-md:text-4xl max-sm:text-3xl">
+                        @{{ title }}
+                    </h2>
+                    <div class="na-underline"></div>
+                </div>
 
-                <div class="flex items-center justify-between gap-8">
-                    <a
-                        :href="navigationLink"
-                        class="hidden max-lg:flex"
-                        v-if="navigationLink"
-                    >
-                        <p class="items-center text-xl max-md:text-base max-sm:text-sm">
-                            @lang('shop::app.components.products.carousel.view-all')
-
-                            <span class="icon-arrow-right text-2xl max-md:text-lg max-sm:text-sm"></span>
-                        </p>
+                <div class="absolute right-0 top-1/2 -translate-y-1/2 hidden max-lg:flex" v-if="navigationLink">
+                     <a :href="navigationLink" class="flex items-center gap-2 text-xl max-md:text-base">
+                        @lang('shop::app.components.products.carousel.view-all')
+                        <span class="icon-arrow-right text-2xl"></span>
                     </a>
-
-                    <template v-if="products.length > 3">
-                        <span
-                            v-if="products.length > 4 || (products.length > 3 && isScreenMax2xl)"
-                            class="icon-arrow-left-stylish rtl:icon-arrow-right-stylish inline-block cursor-pointer text-2xl max-lg:hidden"
-                            role="button"
-                            aria-label="@lang('shop::app.components.products.carousel.previous')"
-                            tabindex="0"
-                            @click="swipeLeft"
-                        >
-                        </span>
-
-                        <span
-                            v-if="products.length > 4 || (products.length > 3 && isScreenMax2xl)"
-                            class="icon-arrow-right-stylish rtl:icon-arrow-left-stylish inline-block cursor-pointer text-2xl max-lg:hidden"
-                            role="button"
-                            aria-label="@lang('shop::app.components.products.carousel.next')"
-                            tabindex="0"
-                            @click="swipeRight"
-                        >
-                        </span>
-                    </template>
                 </div>
             </div>
 
             <div
                 ref="swiperContainer"
-                class="flex gap-8 pb-2.5 [&>*]:flex-[0] mt-10 overflow-auto scroll-smooth scrollbar-hide max-md:gap-7 max-md:mt-5 max-sm:gap-4 max-md:pb-0 max-md:whitespace-nowrap"
+                class="custom-product-grid mt-10 max-md:mt-5"
             >
                 <x-shop::products.card
-                    class="min-w-[291px] max-md:h-fit max-md:min-w-56 max-sm:min-w-[192px]"
-                    v-for="product in products"
+                    class="w-full max-md:h-fit"
+                    v-for="product in products.slice(0, 8)"
                 />
             </div>
 
@@ -119,7 +144,7 @@
 
             methods: {
                 getProducts() {
-                    this.$axios.get(this.src)
+                    this.$axios.get(this.src + (this.src.includes('?') ? '&' : '?') + 'limit=8')
                         .then(response => {
                             this.isLoading = false;
 

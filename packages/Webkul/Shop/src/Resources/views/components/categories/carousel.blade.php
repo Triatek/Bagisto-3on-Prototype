@@ -21,7 +21,7 @@
             <div class="relative">
                 <div
                     ref="swiperContainer"
-                    class="scrollbar-hide flex gap-10 overflow-auto scroll-smooth max-lg:gap-4"
+                    class="scrollbar-hide flex gap-10 overflow-auto pl-12 scroll-smooth max-lg:gap-4"
                 >
                     <div
                         class="grid min-w-[120px] max-w-[120px] grid-cols-1 justify-items-center gap-4 font-medium max-md:min-w-20 max-md:max-w-20 max-md:gap-2.5 max-md:first:ml-4 max-sm:min-w-[60px] max-sm:max-w-[60px] max-sm:gap-1.5"
