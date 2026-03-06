@@ -1,12 +1,4 @@
 <?php return array (
-  'akara/bagisto-midtrans-payment' => 
-  array (
-    'providers' => 
-    array (
-      0 => 'Akara\\MidtransPayment\\Providers\\MidtransServiceProvider',
-      1 => 'Akara\\MidtransPayment\\Providers\\MidtransEventServiceProvider',
-    ),
-  ),
   'astrotomic/laravel-translatable' => 
   array (
     'providers' => 
@@ -34,6 +26,13 @@
       0 => 'Webkul\\Faker\\Providers\\FakerServiceProvider',
     ),
   ),
+  'bagisto/rest-api' => 
+  array (
+    'providers' => 
+    array (
+      0 => 'Webkul\\RestApi\\Providers\\RestApiServiceProvider',
+    ),
+  ),
   'barryvdh/laravel-debugbar' => 
   array (
     'aliases' => 
@@ -55,6 +54,17 @@
     'providers' => 
     array (
       0 => 'Barryvdh\\DomPDF\\ServiceProvider',
+    ),
+  ),
+  'darkaonline/l5-swagger' => 
+  array (
+    'aliases' => 
+    array (
+      'L5Swagger' => 'L5Swagger\\L5SwaggerFacade',
+    ),
+    'providers' => 
+    array (
+      0 => 'L5Swagger\\L5SwaggerServiceProvider',
     ),
   ),
   'diglactic/laravel-breadcrumbs' => 
