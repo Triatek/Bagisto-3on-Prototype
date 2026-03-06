@@ -40,6 +40,11 @@ return Application::configure(basePath: dirname(__DIR__))
          * Add the overridden middleware at the end of the list.
          */
         $middleware->replaceInGroup('web', BaseEncryptCookies::class, EncryptCookies::class);
+
+        $middleware->appendToGroup('api', [
+            \Illuminate\Session\Middleware\StartSession::class,
+            \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+        ]);
     })
     ->withSchedule(function (Schedule $schedule) {
         //

@@ -24,3 +24,30 @@ Route::get('/midtrans/pay', function (Request $request) {
 
     return view('midtrans.pay', compact('token', 'snapUrl', 'clientKey'));
 })->name('midtrans.snap_page');
+
+Route::get('/fast-stock-sync', function (Request $request) {
+    // 1. Keamanan: Cek kunci rahasia 
+    if ($request->query('key') !== 'super-rahasia-3on') {
+        return response()->json(['error' => 'Akses ditolak !'], 401);
+    }
+
+    $productId = $request->query('product_id');
+    $qty = $request->query('qty');
+
+    // 2. Update stok langsung ke database gudang (ID Gudang = 1)
+    \Webkul\Product\Models\ProductInventory::updateOrCreate(
+        ['product_id' => $productId, 'inventory_source_id' => 1],
+        ['qty' => $qty]
+    );
+
+    // 3. Sentil cache Bagisto agar toko depan langsung update
+    $product = \Webkul\Product\Models\Product::find($productId);
+    if ($product) {
+        \Illuminate\Support\Facades\Event::dispatch('catalog.product.update.after', $product);
+    }
+
+    return response()->json([
+        'success' => true, 
+        'message' => 'Stok aman terupdate tanpa menyentuh foto/kategori!'
+    ]);
+});
