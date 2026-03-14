@@ -2140,7 +2140,7 @@
                             @lang('shop::app.customers.account.orders.view.shipping-method')
 
                             <div class="mt-1 grid gap-2.5 text-xs text-gray-800">
-                                {{ $order->shipping_title }}
+                                {!! $order->shipping_title !!}
 
                                 {!! view_render_event('bagisto.shop.customers.account.orders.view.shipping_method_details.after', ['order' => $order]) !!}
                             </div>
@@ -2219,7 +2219,7 @@
                         </p>
 
                         <p class="text-sm">
-                            {{ $order->shipping_title }}
+                            {!! $order->shipping_title !!}
                         </p>
 
                         {!! view_render_event('bagisto.shop.customers.account.orders.view.shipping_method_details.after', ['order' => $order]) !!}
