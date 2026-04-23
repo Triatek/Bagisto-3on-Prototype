@@ -11,7 +11,16 @@ use Midtrans\Snap;
 class Midtrans extends Payment
 {
     protected $code  = 'midtrans';
-
+    public function getImage()
+        {
+            $image = $this->getConfigData('image');
+            
+            if ($image) {
+                return \Illuminate\Support\Facades\Storage::url($image);
+            }
+            
+            return null;
+        }
     public function getRedirectUrl()
     {
         // 1. AMBIL DARI SESSION (Sekarang pasti berhasil!)

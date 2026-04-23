@@ -64,14 +64,19 @@
 
         <link
             rel="preload" as="style"
-            href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=DM+Serif+Display&display=swap"
+            href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,100..900;1,100..900&display=swap"
         />
 
         <link
             rel="stylesheet"
-            href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=DM+Serif+Display&display=swap"
+            href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,100..900;1,100..900&display=swap"
         />
 
+        <style>
+            body, html, * {
+                font-family: 'Hanken Grotesk', sans-serif !important;
+            }
+        </style>
         @stack('styles')
 
         <style>
@@ -99,13 +104,10 @@
         </a>
 
         <div id="app">
-            <!-- Flash Message Blade Component -->
             <x-shop::flash-group />
 
-            <!-- Confirm Modal Blade Component -->
             <x-shop::modal.confirm />
 
-            <!-- Page Header Blade Component -->
             @if ($hasHeader)
                 <x-shop::layouts.header />
             @endif
@@ -119,7 +121,6 @@
 
             {!! view_render_event('bagisto.shop.layout.content.before') !!}
 
-            <!-- Page Content Blade Component -->
             <main id="main" class="bg-white">
                 {{ $slot }}
             </main>
@@ -127,12 +128,10 @@
             {!! view_render_event('bagisto.shop.layout.content.after') !!}
 
 
-            <!-- Page Services Blade Component -->
             @if ($hasFeature)
                 <x-shop::layouts.services />
             @endif
 
-            <!-- Page Footer Blade Component -->
             @if ($hasFooter)
                 <x-shop::layouts.footer />
             @endif
