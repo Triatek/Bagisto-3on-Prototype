@@ -729,7 +729,7 @@
 
                             <div class="pt-4">
                                 <p class="font-semibold text-gray-800 dark:text-white">
-                                    {{ $order->shipping_title }}
+                                    {!! $order->shipping_title !!}
                                 </p>
 
                                 <p class="text-gray-600 dark:text-gray-300">

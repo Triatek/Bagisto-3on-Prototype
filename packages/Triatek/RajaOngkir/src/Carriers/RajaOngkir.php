@@ -125,7 +125,7 @@ class RajaOngkir extends AbstractShipping
                         $object->carrier = 'rajaongkir';
                         
                         $imgUrl = asset('images/' . $kurir . '.png');
-                        $logoHtml = "<img src='$imgUrl' style='height: 30px; width: auto; display: block; margin-bottom: 5px;'>";
+                        $logoHtml = "<img src='$imgUrl' style='height: 30px; width: auto ; display: block; margin-bottom: 5px;'>";
 
                         $object->carrier_title = $logoHtml;
                         $object->method = 'rajaongkir_' . $kurir . '_' . $cost['service'];
