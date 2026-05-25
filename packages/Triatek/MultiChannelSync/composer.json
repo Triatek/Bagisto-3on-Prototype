@@ -1,0 +1,24 @@
+{
+    "name": "triatek/bagisto-multichannel-sync",
+    "description": "Sinkronisasi produk dan stok Bagisto ke Shopee & TikTok Shop secara otomatis",
+    "type": "library",
+    "license": "MIT",
+    "require": {
+        "php": "^8.2",
+        "laravel/framework": "^10.0|^11.0",
+        "laraditz/shopee": "^1.0",
+        "laraditz/tiktok": "^1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Triatek\\MultiChannelSync\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Triatek\\MultiChannelSync\\Providers\\MultiChannelSyncServiceProvider"
+            ]
+        }
+    }
+}
