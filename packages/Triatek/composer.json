@@ -1,0 +1,26 @@
+{
+    "name": "triatek/doku",
+    "description": "Doku Payment Gateway Integration for Bagisto",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Triatek Developer",
+            "email": "dev@triatek.com"
+        }
+    ],
+    "require": {
+        "php": "^8.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Triatek\\Doku\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Triatek\\Doku\\Providers\\DokuServiceProvider"
+            ]
+        }
+    }
+}

@@ -104,6 +104,28 @@
       0 => 'Konekt\\Enum\\Eloquent\\EnumServiceProvider',
     ),
   ),
+  'laraditz/shopee' => 
+  array (
+    'aliases' => 
+    array (
+      'Shopee' => 'Laraditz\\Shopee\\Facades\\Shopee',
+    ),
+    'providers' => 
+    array (
+      0 => 'Laraditz\\Shopee\\ShopeeServiceProvider',
+    ),
+  ),
+  'laraditz/tiktok' => 
+  array (
+    'aliases' => 
+    array (
+      'TikTok' => 'Laraditz\\TikTok\\Facades\\TikTok',
+    ),
+    'providers' => 
+    array (
+      0 => 'Laraditz\\TikTok\\TikTokServiceProvider',
+    ),
+  ),
   'laravel/octane' => 
   array (
     'aliases' => 
