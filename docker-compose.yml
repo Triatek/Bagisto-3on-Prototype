@@ -10,6 +10,8 @@ services:
     container_name: bagistostore
     restart: unless-stopped
     tty: true
+    ports:
+      - "3000:8000"
     environment:
       SERVICE_NAME: bagistostore
       SERVICE_TAGS: dev
@@ -21,18 +23,18 @@ services:
       - app-network
 
   #Nginx Service
-  webserverbagistostore:
-    image: nginx:alpine
-    container_name: webserverbagistostore
-    restart: unless-stopped
-    tty: true
-    ports:
-      - "3000:80"
-    volumes:
-      - ./:/var/www
-      - ./nginx/conf.d/:/etc/nginx/conf.d/
-    networks:
-      - app-network
+  # webserverbagistostore:
+  #   image: nginx:alpine
+  #   container_name: webserverbagistostore
+  #   restart: unless-stopped
+  #   tty: true
+  #   ports:
+  #     - "3000:80"
+  #   volumes:
+  #     - ./:/var/www
+  #     - ./nginx/conf.d/:/etc/nginx/conf.d/
+  #   networks:
+  #     - app-network
 
 #Docker Networks
 networks:
