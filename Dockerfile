@@ -1,10 +1,10 @@
-FROM php:8.2-cli
-
-# Copy composer.lock and composer.json
-COPY composer.lock composer.json /var/www/
+FROM php:8.2.29-cli
 
 # Set working directory
 WORKDIR /var/www
+
+# Copy composer.lock and composer.json
+COPY composer.lock composer.json /var/www/
 
 RUN docker-php-ext-install pdo pdo_mysql
 
@@ -42,7 +42,7 @@ RUN apt-get -y install --fix-missing \
     libonig-dev \
     libxml2-dev
 
-    RUN docker-php-ext-install \
+RUN docker-php-ext-install \
     exif \
     pcntl \
     bcmath \
@@ -55,15 +55,18 @@ RUN apt-get -y install --fix-missing \
     mbstring \
     bz2 \
     zip \
-    intl
+    intl \
+    calendar
+
+# Copy local.ini explicitly
+COPY ./php/local.ini /usr/local/etc/php/php.ini
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-COPY . /var/www
-
-# RUN composer install --no-interaction --optimize-autoloader
+COPY . .
 
 # Expose port 9000 and start php-fpm server
-EXPOSE 3000
+# EXPOSE 9000
 
-CMD [ "php", "artisan", "serve", "--host=0.0.0.0" ]
+# CMD [ "php", "artisan", "serve", "--host=0.0.0.0" ]
+CMD bash -c "composer install -n --optimize-autoloader && php artisan serve --host=0.0.0.0"
