@@ -68,5 +68,11 @@ COPY . .
 # Expose port 9000 and start php-fpm server
 # EXPOSE 9000
 
+# Rewrite folder permission
+RUN chmod -R 775 storage bootstrap/cache
+
+# Remove symlinks
+RUN rm -rf public/storage
+
 # CMD [ "php", "artisan", "serve", "--host=0.0.0.0" ]
-CMD bash -c "composer install -n --optimize-autoloader && php artisan serve --host=0.0.0.0"
+CMD bash -c "composer install -n --optimize-autoloader && php artisan storage:link && php artisan serve --host=0.0.0.0"
