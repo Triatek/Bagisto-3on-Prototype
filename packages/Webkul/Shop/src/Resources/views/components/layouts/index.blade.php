@@ -11,6 +11,8 @@
     dir="{{ core()->getCurrentLocale()->direction }}"
 >
     <head>
+        {!! view_render_event('bagisto.shop.layout.head.before') !!}
+
         <!-- Google tag (gtag.js) -->
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-GZD4PJS7Q1"></script>
         <script>
@@ -20,8 +22,6 @@
 
         gtag('config', 'G-GZD4PJS7Q1');
         </script>
-
-        {!! view_render_event('bagisto.shop.layout.head.before') !!}
 
         <title>{{ $title ?? '' }}</title>
 
