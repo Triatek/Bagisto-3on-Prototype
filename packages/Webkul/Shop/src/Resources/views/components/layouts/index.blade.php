@@ -11,6 +11,15 @@
     dir="{{ core()->getCurrentLocale()->direction }}"
 >
     <head>
+        <!-- Google tag (gtag.js) -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-GZD4PJS7Q1"></script>
+        <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-GZD4PJS7Q1');
+        </script>
 
         {!! view_render_event('bagisto.shop.layout.head.before') !!}
 
@@ -92,16 +101,6 @@
         {!! view_render_event('bagisto.shop.layout.head.after') !!}
 
     </head>
-
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-GZD4PJS7Q1"></script>
-    <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-
-    gtag('config', 'G-GZD4PJS7Q1');
-    </script>
 
     <body>
         {!! view_render_event('bagisto.shop.layout.body.before') !!}
