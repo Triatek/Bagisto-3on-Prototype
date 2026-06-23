@@ -183,33 +183,29 @@ public function storeOrder()
         $redirectUrl = route('shop.checkout.onepage.success');
 
         try {
-            // Ambil URL Pembayaran dari Plugin (Midtrans)
+            // Ambil URL Pembayaran dari Plugin (Doku)
             if ($paymentRedirect = Payment::getRedirectUrl($cart)) {
                 $redirectUrl = $paymentRedirect;
 
                 /**
                  * LOGIKA PAY NOW:
-                 * Midtrans memberikan URL seperti: https://app.sandbox.midtrans.com/snap/v2/vtweb/TOKEN_DISINI
-                 * Kita pecah URL-nya untuk mengambil TOKEN tersebut.
+                 * Doku memberikan URL pembayaran lengkap.
+                 * Simpan URL tersebut agar bisa digunakan untuk tombol "Bayar Sekarang".
                  */
-                $urlParts = explode('/', $paymentRedirect);
-                $snapToken = end($urlParts);
-
-                // Jika token berhasil didapat, simpan ke database order_payments
-                if ($order->payment && ! empty($snapToken)) {
+                if ($order->payment && ! empty($paymentRedirect)) {
                     $payment = $order->payment;
                     
                     // Ambil data additional yang sudah ada (jika ada)
                     $additional = $payment->additional ?? [];
                     
-                    // Masukkan snap_token ke dalam array
-                    $additional['snap_token'] = $snapToken;
+                    // Simpan URL pembayaran Doku
+                    $additional['doku_payment_url'] = $paymentRedirect;
                     
                     // Update data payment
                     $payment->additional = $additional;
                     $payment->save();
 
-                    Log::info("Snap Token Berhasil Disimpan: " . $snapToken . " untuk Order #" . $order->id);
+                    Log::info("Doku Payment URL Berhasil Disimpan untuk Order #" . $order->id);
                 }
             }
         } catch (\Exception $e) {

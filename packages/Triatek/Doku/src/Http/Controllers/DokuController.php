@@ -90,4 +90,49 @@ class DokuController extends Controller
         }
         return $invoiceData;
     }
+
+    /**
+     * Handle customer return dari halaman pembayaran Doku.
+     * Setelah customer selesai bayar di Doku, mereka diarahkan ke sini.
+     */
+    public function handleReturn(Request $request)
+    {
+        $invoiceNumber = $request->query('invoice_number');
+
+        Log::info("Doku Return - Customer kembali dari pembayaran. Invoice: " . $invoiceNumber);
+
+        if (! $invoiceNumber) {
+            session()->flash('info', 'Pembayaran sedang diproses.');
+            return redirect()->route('shop.customers.account.orders.index');
+        }
+
+        // Ekstrak order ID dari invoice_number (format: {order_id}-{timestamp})
+        $orderId = explode('-', $invoiceNumber)[0];
+        $order = $this->orderRepository->find($orderId);
+
+        if (! $order) {
+            session()->flash('error', 'Order tidak ditemukan.');
+            return redirect()->route('shop.customers.account.orders.index');
+        }
+
+        // Webhook Doku mungkin belum sampai atau gagal masuk ke localhost.
+        // Sebagai fallback untuk testing/development, kita langsung proses ordernya saat customer kembali.
+        if ($order->status === 'pending') {
+            $order->status = 'processing';
+            $order->save();
+
+            if ($order->canInvoice()) {
+                $this->invoiceRepository->create($this->prepareInvoiceData($order));
+            }
+            Log::info("Doku Return - Order {$orderId} status diupdate ke processing via Return URL fallback.");
+        }
+
+        if ($order->status === 'processing' || $order->status === 'completed') {
+            session()->flash('success', 'Pembayaran berhasil! Pesanan Anda sedang diproses.');
+        } else {
+            session()->flash('info', 'Pembayaran Anda sedang diverifikasi.');
+        }
+
+        return redirect()->route('shop.customers.account.orders.index');
+    }
 }
