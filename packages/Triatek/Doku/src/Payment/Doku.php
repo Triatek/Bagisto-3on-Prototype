@@ -50,11 +50,14 @@ class Doku extends Payment
         $baseUrl = $isSandbox ? 'https://api-sandbox.doku.com' : 'https://api.doku.com';
 
         // Menyusun Payload berdasarkan Panduan Integrasi Doku
+        $invoiceNumber = $order->id . '-' . time();
+
         $payload = [
             "order" => [
                 "amount"         => intval(floatval($order->grand_total)),
-                "invoice_number" => $order->id . '-' . time(),
-                "currency"       => "IDR"
+                "invoice_number" => $invoiceNumber,
+                "currency"       => "IDR",
+                "callback_url"   => url('/doku/return?invoice_number=' . $invoiceNumber),
             ],
             "payment" => [
                 "payment_due_date" => 60 
