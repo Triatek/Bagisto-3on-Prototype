@@ -155,13 +155,30 @@
                         <x-shop::form.control-group.error control-name="country" />
                     </x-shop::form.control-group>
         
-                    <!-- State Name -->
+                    <!-- State / Province Name -->
                     <x-shop::form.control-group>
                         <x-shop::form.control-group.label class="{{ core()->isStateRequired() ? 'required' : '' }}">
                             @lang('shop::app.customers.account.addresses.create.state')
                         </x-shop::form.control-group.label>
         
-                        <template v-if="haveStates()">
+                        <template v-if="country === 'ID'">
+                            <x-shop::form.control-group.control
+                                type="select"
+                                id="state"
+                                name="state"
+                                rules="{{ core()->isStateRequired() ? 'required' : '' }}"
+                                v-model="state"
+                                :label="trans('shop::app.customers.account.addresses.create.state')"
+                                @change="handleProvinceChange"
+                            >
+                                <option value="" disabled>@lang('shop::app.customers.account.addresses.create.select-province')</option>
+                                <option v-for="prov in provinces" :key="prov.code" :value="prov.name">
+                                    @{{ prov.name }}
+                                </option>
+                            </x-shop::form.control-group.control>
+                        </template>
+
+                        <template v-else-if="haveStates()">
                             <x-shop::form.control-group.control
                                 type="select"
                                 id="state"
@@ -202,14 +219,32 @@
                             @lang('shop::app.customers.account.addresses.create.city')
                         </x-shop::form.control-group.label>
 
-                        <x-shop::form.control-group.control
-                            type="text"
-                            name="city"
-                            rules="required"
-                            :value="old('city')"
-                            :label="trans('shop::app.customers.account.addresses.create.city')"
-                            :placeholder="trans('shop::app.customers.account.addresses.create.city')"
-                        />
+                        <template v-if="country === 'ID'">
+                            <x-shop::form.control-group.control
+                                type="select"
+                                name="city"
+                                rules="required"
+                                v-model="city"
+                                :label="trans('shop::app.customers.account.addresses.create.city')"
+                                :disabled="cities.length === 0"
+                            >
+                                <option value="" disabled>@{{ isFetchingCities ? '@lang('shop::app.customers.account.addresses.create.loading')' : '@lang('shop::app.customers.account.addresses.create.select-city')' }}</option>
+                                <option v-for="c in cities" :key="c.code" :value="c.name">
+                                    @{{ c.name }}
+                                </option>
+                            </x-shop::form.control-group.control>
+                        </template>
+
+                        <template v-else>
+                            <x-shop::form.control-group.control
+                                type="text"
+                                name="city"
+                                rules="required"
+                                :value="old('city')"
+                                :label="trans('shop::app.customers.account.addresses.create.city')"
+                                :placeholder="trans('shop::app.customers.account.addresses.create.city')"
+                            />
+                        </template>
 
                         <x-shop::form.control-group.error control-name="city" />
                     </x-shop::form.control-group>
@@ -299,11 +334,21 @@
     
                 data() {
                     return {
-                        country: "{{ old('country') }}",
-
+                        country: "{{ old('country') ?? 'ID' }}",
                         state: "{{ old('state') }}",
-
+                        city: "{{ old('city') }}",
                         countryStates: @json(core()->groupedStatesByCountries()),
+
+                        // Indo Region API data
+                        provinces: [],
+                        cities: [],
+                        isFetchingCities: false,
+                    }
+                },
+
+                created() {
+                    if (this.country === 'ID') {
+                        this.fetchProvinces();
                     }
                 },
     
@@ -315,6 +360,37 @@
                         * true if the array has a length greater than 0, and otherwise false.
                         */
                         return !!this.countryStates[this.country]?.length;
+                    },
+
+                    async fetchProvinces() {
+                        try {
+                            const response = await this.$axios.get("{{ route('api.provinces') }}");
+                            this.provinces = response.data;
+                        } catch (error) {
+                            console.error('Failed to fetch provinces:', error);
+                        }
+                    },
+
+                    async fetchCities(provinceCode) {
+                        this.isFetchingCities = true;
+                        this.cities = [];
+                        this.city = '';
+                        try {
+                            const response = await this.$axios.get("{{ url('/indo-region/cities') }}/" + provinceCode);
+                            this.cities = response.data;
+                        } catch (error) {
+                            console.error('Failed to fetch cities:', error);
+                        } finally {
+                            this.isFetchingCities = false;
+                        }
+                    },
+
+                    handleProvinceChange(event) {
+                        const selectedName = event.target.value;
+                        const selectedProvObj = this.provinces.find(p => p.name === selectedName);
+                        if (selectedProvObj) {
+                            this.fetchCities(selectedProvObj.code);
+                        }
                     },
                 }
             });

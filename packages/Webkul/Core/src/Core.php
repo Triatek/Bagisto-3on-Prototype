@@ -951,12 +951,12 @@ class Core
             $prerenderEagerness = $this->getConfigData($configPath.'prerender_eagerness') ?? 'moderate';
 
             $prerenderIgnoreUrls = array_filter(
-                explode('|', $this->getConfigData($configPath.'prerender_ignore_urls')),
+                explode('|', $this->getConfigData($configPath.'prerender_ignore_urls') ?? ''),
                 fn ($url) => trim($url) !== ''
             );
 
             $prerenderIgnoreParams = array_filter(
-                explode('|', $this->getConfigData($configPath.'prerender_ignore_url_params')),
+                explode('|', $this->getConfigData($configPath.'prerender_ignore_url_params') ?? ''),
                 fn ($param) => trim($param) !== ''
             );
 
@@ -985,12 +985,12 @@ class Core
             $prefetchEagerness = $this->getConfigData($configPath.'prefetch_eagerness') ?? 'moderate';
 
             $prefetchIgnoreUrls = array_filter(
-                explode('|', $this->getConfigData($configPath.'prefetch_ignore_urls')),
+                explode('|', $this->getConfigData($configPath.'prefetch_ignore_urls') ?? ''),
                 fn ($url) => trim($url) !== ''
             );
 
             $prefetchIgnoreParams = array_filter(
-                explode('|', $this->getConfigData($configPath.'prefetch_ignore_url_params')),
+                explode('|', $this->getConfigData($configPath.'prefetch_ignore_url_params') ?? ''),
                 fn ($param) => trim($param) !== ''
             );
 

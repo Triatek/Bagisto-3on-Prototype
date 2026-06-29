@@ -8,6 +8,11 @@ use Webkul\Product\Helpers\Review;
 class ProductResource extends JsonResource
 {
     /**
+     * @var \Webkul\Product\Helpers\Review
+     */
+    protected $reviewHelper;
+
+    /**
      * Create a new resource instance.
      *
      * @param  mixed  $resource

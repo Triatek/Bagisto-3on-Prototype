@@ -68,23 +68,23 @@
 @pushOnce('scripts')
 <script type="text/x-template" id="v-shipping-estimator-template">
         <div class="border rounded-lg p-4 bg-gray-50 mb-4">
-            <p class="font-medium text-gray-800 mb-3 text-lg">Cek Ongkos Kirim</p>
+            <p class="font-medium text-gray-800 mb-3 text-lg">@lang('shop::app.checkout.cart.summary.estimate-shipping.check-shipping-cost')</p>
             
             <div class="mb-3">
-                <label class="block text-sm text-gray-600 mb-1">Negara</label>
+                <label class="block text-sm text-gray-600 mb-1">@lang('shop::app.checkout.cart.summary.estimate-shipping.country')</label>
                 <select v-model="address.country" class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white">
                     <option value="ID">Indonesia</option>
                 </select>
             </div>
 
             <div class="mb-3">
-                <label class="block text-sm text-gray-600 mb-1">Provinsi</label>
+                <label class="block text-sm text-gray-600 mb-1">@lang('shop::app.checkout.cart.summary.estimate-shipping.state')</label>
                 <select 
                     v-model="address.state" 
                     @change="handleProvinceChange" 
                     class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white"
                 >
-                    <option value="" disabled>Pilih Provinsi</option>
+                    <option value="" disabled>@lang('shop::app.checkout.cart.summary.estimate-shipping.select-province')</option>
                     <option v-for="prov in provinces" :key="prov.code" :value="prov.name">
                         @{{ prov.name }}
                     </option>
@@ -92,14 +92,14 @@
             </div>
 
             <div class="mb-3">
-                <label class="block text-sm text-gray-600 mb-1">Kota / Kabupaten</label>
+                <label class="block text-sm text-gray-600 mb-1">@lang('shop::app.checkout.cart.summary.estimate-shipping.select-city')</label>
                 <select 
                     v-model="address.city" 
                     :disabled="cities.length === 0"
                     @change="calculateShipping" 
                     class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white disabled:bg-gray-100"
                 >
-                    <option value="" disabled>@{{ isFetchingCities ? 'Memuat...' : 'Pilih Kota' }}</option>
+                    <option value="" disabled>@{{ isFetchingCities ? '@lang('shop::app.checkout.cart.summary.estimate-shipping.loading')' : '@lang('shop::app.checkout.cart.summary.estimate-shipping.select-city')' }}</option>
                     <option v-for="city in cities" :key="city.code" :value="city.name">
                         @{{ city.name }}
                     </option>
@@ -107,33 +107,33 @@
             </div>
 
 <div class="mb-3">
-                 <label class="block text-sm text-gray-600 mb-1">Kode Pos</label>
+                 <label class="block text-sm text-gray-600 mb-1">@lang('shop::app.checkout.cart.summary.estimate-shipping.postcode')</label>
                  <input 
                     type="text" 
                     v-model="address.postcode" 
                     @input="handlePostcodeInput"
                     maxlength="5"
                     class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm" 
-                    placeholder="Contoh: 40123"
+                    placeholder="@lang('shop::app.checkout.cart.summary.estimate-shipping.postcode-placeholder')"
                  >
                  </div>
 
             <div v-if="isLoading" class="text-center text-sm text-gray-500 py-2">
                 <span class="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900 mr-2"></span>
-                Menghitung ongkir...
+                @lang('shop::app.checkout.cart.summary.estimate-shipping.calculating')
             </div>
 
             <p v-if="errorMessage" class="text-red-500 text-xs mb-2">@{{ errorMessage }}</p>
 
             <div v-if="shippingMethods.length > 0" class="border-t pt-3 mt-2">
-                <label class="block text-sm font-bold text-blue-700 mb-2">Pilih Layanan Pengiriman:</label>
+                <label class="block text-sm font-bold text-blue-700 mb-2">@lang('shop::app.checkout.cart.summary.estimate-shipping.select-service')</label>
                 
                 <select 
                     v-model="selectedRate" 
                     @change="applyShipping"
                     class="w-full rounded-md border-2 border-blue-500 bg-blue-50 px-3 py-2 text-sm font-medium focus:ring-blue-500"
                 >
-                    <option :value="null">-- Pilih Ekspedisi --</option>
+                    <option :value="null">@lang('shop::app.checkout.cart.summary.estimate-shipping.select-courier')</option>
                     <optgroup v-for="method in shippingMethods" :label="method.carrier_title">
                         <option v-for="rate in method.rates" :value="rate">
                             @{{ rate.method_title }} - @{{ formatPrice(rate.price) }}
@@ -148,7 +148,7 @@
         app.component('v-shipping-estimator', {
             template: '#v-shipping-estimator-template',
             props: ['cart'],
-            emits: ['shipping-selected'], // Event ke parent
+            emits: ['shipping-selected'],
             
             data() {
                 return {
@@ -173,10 +173,10 @@
             },
 
             methods: {
-                // --- API LOGIC (Sama seperti Checkout) ---
+                // --- API LOGIC ---
                 async fetchProvinces() {
                     try {
-                        const response = await this.$axios.get('/indo-region/provinces');
+                        const response = await this.$axios.get("{{ route('api.provinces') }}");
                         this.provinces = response.data;
                     } catch (e) {}
                 },
@@ -186,7 +186,7 @@
                     this.cities = [];
                     this.address.city = '';
                     try {
-                        const response = await this.$axios.get('/indo-region/cities/' + provinceCode);
+                        const response = await this.$axios.get("{{ url('/indo-region/cities') }}/" + provinceCode);
                         this.cities = response.data;
                     } catch (e) {
                     } finally {
@@ -198,7 +198,7 @@
                         const selectedName = event.target.value;
                         const selectedProvObj = this.provinces.find(p => p.name === selectedName);
                         
-                        // Reset Ongkir Lama & Pilihan Kota saat ganti Provinsi
+                        // Reset shipping options when province changes
                         this.shippingMethods = [];
                         this.selectedRate = null;
                         this.$emit('shipping-selected', null);
@@ -206,19 +206,17 @@
                         if (selectedProvObj) this.fetchCities(selectedProvObj.code);
                     },
                     handlePostcodeInput() {
-                    // 1. Pastikan hanya angka (Hapus huruf jika ada yang iseng ngetik huruf)
+                    // 1. Only allow numbers
                     this.address.postcode = this.address.postcode.replace(/[^0-9]/g, '');
 
-                    // 2. Cek apakah panjangnya sudah pas 5 digit?
+                    // 2. Auto-calculate when 5 digits entered
                     if (this.address.postcode.length === 5) {
-                        // Jika sudah 5, langsung tembak API!
                         this.calculateShipping();
                     }
                 },
 
-                // --- HITUNG ONGKIR LOGIC ---
+                // --- CALCULATE SHIPPING ---
                 calculateShipping() {
-                    // Validasi: Jangan hitung jika Kota belum dipilih
                     if (!this.address.city) return;
 
                     this.isLoading = true;
@@ -241,12 +239,9 @@
                         })
                         .catch(error => {
                             this.isLoading = false;
-                            // Silent error atau tampilkan pesan kecil jika perlu
-                            // this.errorMessage = error.response?.data?.message; 
                         });
                 },
                 applyShipping() {
-                    // Kirim data tarif yang dipilih ke Parent (Summary)
                     if (this.selectedRate) {
                         this.$emit('shipping-selected', this.selectedRate);
                     }
