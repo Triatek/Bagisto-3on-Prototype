@@ -30,9 +30,10 @@
     };
 
     // --- 2. DATA STANDAR ---
-    $avgRatings = $reviewHelper->getAverageRating($product);
-    $totalReviews = $reviewHelper->getTotalFeedback($product);
-    $percentageRatings = $reviewHelper->getPercentageRating($product);
+    $realProductModel = $product->product ?? $product;
+    $avgRatings = $reviewHelper->getAverageRating($realProductModel);
+    $totalReviews = $reviewHelper->getTotalFeedback($realProductModel);
+    $percentageRatings = $reviewHelper->getPercentageRating($realProductModel);
     $customAttributeValues = $productViewHelper->getAdditionalData($product);
     $attributeData = collect($customAttributeValues)->filter(fn ($item) => ! empty($item['value']));
     

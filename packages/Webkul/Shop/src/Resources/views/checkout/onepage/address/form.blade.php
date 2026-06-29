@@ -13,7 +13,7 @@
 
             <x-shop::form.control-group class="!mb-4">
                 <x-shop::form.control-group.label class="required !mt-0">
-                    Nama Lengkap
+                    @lang('shop::app.checkout.onepage.address.full-name')
                 </x-shop::form.control-group.label>
 
                 <x-shop::form.control-group.control
@@ -22,8 +22,8 @@
                     v-model="fullNameInput"
                     @input="handleFullNameChange"
                     rules="required"
-                    label="Nama Lengkap"
-                    placeholder="Nama Lengkap Penerima"
+                    :label="trans('shop::app.checkout.onepage.address.full-name')"
+                    :placeholder="trans('shop::app.checkout.onepage.address.full-name-placeholder')"
                 />
                 
                 <x-shop::form.control-group.error ::name="controlName + '.first_name'" />
@@ -154,7 +154,7 @@
                         :label="trans('shop::app.checkout.onepage.address.state')"
                         @change="handleProvinceChange"
                     >
-                        <option value="" disabled>Pilih Provinsi</option>
+                        <option value="" disabled>@lang('shop::app.checkout.onepage.address.select-province')</option>
                         <option v-for="prov in provinces" :key="prov.code" :value="prov.name">
                             @{{ prov.name }}
                         </option>
@@ -181,7 +181,7 @@
                         :label="trans('shop::app.checkout.onepage.address.city')"
                         ::disabled="cities.length === 0"
                     >
-                        <option value="" disabled>@{{ isFetchingCities ? 'Memuat...' : 'Pilih Kota / Kabupaten' }}</option>
+                        <option value="" disabled>@{{ isFetchingCities ? '@lang('shop::app.checkout.onepage.address.loading')' : '@lang('shop::app.checkout.onepage.address.select-city')' }}</option>
                         <option v-for="city in cities" :key="city.code" :value="city.name">
                             @{{ city.name }}
                         </option>
@@ -368,10 +368,10 @@
 
                 async fetchProvinces() {
                     try {
-                        const response = await this.$axios.get('/indo-region/provinces');
+                        const response = await this.$axios.get("{{ route('api.provinces') }}");
                         this.provinces = response.data;
                     } catch (error) {
-                        console.error('Gagal ambil provinsi:', error);
+                        console.error('Failed to fetch provinces:', error);
                     }
                 },
 
@@ -381,10 +381,10 @@
                     this.address.city = ''; 
                     
                     try {
-                        const response = await this.$axios.get('/indo-region/cities/' + provinceCode);
+                        const response = await this.$axios.get("{{ url('/indo-region/cities') }}/" + provinceCode);
                         this.cities = response.data;
                     } catch (error) {
-                        console.error('Gagal ambil kota:', error);
+                        console.error('Failed to fetch cities:', error);
                     } finally {
                         this.isFetchingCities = false;
                     }

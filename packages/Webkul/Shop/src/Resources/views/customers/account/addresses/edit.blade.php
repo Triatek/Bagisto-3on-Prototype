@@ -177,7 +177,25 @@
                     <x-shop::form.control-group.label class="{{ core()->isStateRequired() ? 'required' : '' }}">
                         @lang('shop::app.customers.account.addresses.edit.state')
                     </x-shop::form.control-group.label>
-                    <template v-if="haveStates()">
+
+                    <template v-if="addressData.country === 'ID'">
+                        <x-shop::form.control-group.control
+                            type="select"
+                            name="state"
+                            id="state"
+                            rules="{{ core()->isStateRequired() ? 'required' : '' }}"
+                            v-model="addressData.state"
+                            :label="trans('shop::app.customers.account.addresses.edit.state')"
+                            @change="handleProvinceChange"
+                        >
+                            <option value="" disabled>@lang('shop::app.customers.account.addresses.edit.select-province')</option>
+                            <option v-for="prov in provinces" :key="prov.code" :value="prov.name">
+                                @{{ prov.name }}
+                            </option>
+                        </x-shop::form.control-group.control>
+                    </template>
+
+                    <template v-else-if="haveStates()">
                         <x-shop::form.control-group.control
                             type="select"
                             name="state"
@@ -212,19 +230,38 @@
 
                 {!! view_render_event('bagisto.shop.customers.account.addresses.edit_form_controls.state.after', ['address' => $address]) !!}
 
+                <!-- City -->
                 <x-shop::form.control-group>
                     <x-shop::form.control-group.label class="required">
                         @lang('shop::app.customers.account.addresses.edit.city')
                     </x-shop::form.control-group.label>
 
-                    <x-shop::form.control-group.control
-                        type="text"
-                        name="city"
-                        rules="required"
-                        :value="old('city') ?? $address->city"
-                        :label="trans('shop::app.customers.account.addresses.edit.city')"
-                        :placeholder="trans('shop::app.customers.account.addresses.edit.city')"
-                    />
+                    <template v-if="addressData.country === 'ID'">
+                        <x-shop::form.control-group.control
+                            type="select"
+                            name="city"
+                            rules="required"
+                            v-model="addressData.city"
+                            :label="trans('shop::app.customers.account.addresses.edit.city')"
+                            :disabled="cities.length === 0"
+                        >
+                            <option value="" disabled>@{{ isFetchingCities ? '@lang('shop::app.customers.account.addresses.edit.loading')' : '@lang('shop::app.customers.account.addresses.edit.select-city')' }}</option>
+                            <option v-for="c in cities" :key="c.code" :value="c.name">
+                                @{{ c.name }}
+                            </option>
+                        </x-shop::form.control-group.control>
+                    </template>
+
+                    <template v-else>
+                        <x-shop::form.control-group.control
+                            type="text"
+                            name="city"
+                            rules="required"
+                            :value="old('city') ?? $address->city"
+                            :label="trans('shop::app.customers.account.addresses.edit.city')"
+                            :placeholder="trans('shop::app.customers.account.addresses.edit.city')"
+                        />
+                    </template>
 
                     <x-shop::form.control-group.error control-name="city" />
                 </x-shop::form.control-group>
@@ -289,17 +326,67 @@
                     return {
                         addressData: {
                             country: "{{ old('country') ?? $address->country }}",
-
                             state: "{{ old('state') ?? $address->state }}",
+                            city: "{{ old('city') ?? $address->city }}",
                         },
 
                         countryStates: @json(core()->groupedStatesByCountries()),
+
+                        // Indo Region API data
+                        provinces: [],
+                        cities: [],
+                        isFetchingCities: false,
                     };
+                },
+
+                created() {
+                    if (this.addressData.country === 'ID') {
+                        this.fetchProvinces();
+                    }
                 },
     
                 methods: {
                     haveStates() {
                         return !!this.countryStates[this.addressData.country]?.length;
+                    },
+
+                    async fetchProvinces() {
+                        try {
+                            const response = await this.$axios.get("{{ route('api.provinces') }}");
+                            this.provinces = response.data;
+
+                            // If editing an existing address with a state, try to pre-load cities
+                            if (this.addressData.state) {
+                                const selectedProvObj = this.provinces.find(p => p.name === this.addressData.state);
+                                if (selectedProvObj) {
+                                    await this.fetchCities(selectedProvObj.code);
+                                }
+                            }
+                        } catch (error) {
+                            console.error('Failed to fetch provinces:', error);
+                        }
+                    },
+
+                    async fetchCities(provinceCode) {
+                        this.isFetchingCities = true;
+                        this.cities = [];
+                        try {
+                            const response = await this.$axios.get("{{ url('/indo-region/cities') }}/" + provinceCode);
+                            this.cities = response.data;
+                        } catch (error) {
+                            console.error('Failed to fetch cities:', error);
+                        } finally {
+                            this.isFetchingCities = false;
+                        }
+                    },
+
+                    handleProvinceChange(event) {
+                        const selectedName = event.target.value;
+                        const selectedProvObj = this.provinces.find(p => p.name === selectedName);
+                        this.addressData.city = '';
+                        if (selectedProvObj) {
+                            this.fetchCities(selectedProvObj.code);
+                        }
                     },
                 },
             });
