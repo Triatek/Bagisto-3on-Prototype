@@ -94,6 +94,14 @@ class DokuController extends Controller
     /**
      * Handle customer return dari halaman pembayaran Doku.
      * Setelah customer selesai bayar di Doku, mereka diarahkan ke sini.
+     *
+     * CATATAN: Method ini TIDAK mengubah status order secara otomatis.
+     * Status order hanya boleh diubah melalui:
+     * 1. Webhook notification dari Doku (handleNotification) yang sudah diverifikasi signature-nya
+     * 2. Admin secara manual melalui dashboard
+     *
+     * Alasan: Customer bisa saja kembali ke toko tanpa menyelesaikan pembayaran,
+     * sehingga mengubah status otomatis saat return akan menyebabkan celah keamanan.
      */
     public function handleReturn(Request $request)
     {
@@ -102,7 +110,7 @@ class DokuController extends Controller
         Log::info("Doku Return - Customer kembali dari pembayaran. Invoice: " . $invoiceNumber);
 
         if (! $invoiceNumber) {
-            session()->flash('info', 'Pembayaran sedang diproses.');
+            session()->flash('info', 'Pembayaran sedang diverifikasi. Silakan cek kembali status pesanan Anda.');
             return redirect()->route('shop.customers.account.orders.index');
         }
 
@@ -115,22 +123,15 @@ class DokuController extends Controller
             return redirect()->route('shop.customers.account.orders.index');
         }
 
-        // Webhook Doku mungkin belum sampai atau gagal masuk ke localhost.
-        // Sebagai fallback untuk testing/development, kita langsung proses ordernya saat customer kembali.
-        if ($order->status === 'pending') {
-            $order->status = 'processing';
-            $order->save();
-
-            if ($order->canInvoice()) {
-                $this->invoiceRepository->create($this->prepareInvoiceData($order));
-            }
-            Log::info("Doku Return - Order {$orderId} status diupdate ke processing via Return URL fallback.");
-        }
+        // Tidak mengubah status apapun — biarkan admin yang memverifikasi dan mengubah status secara manual.
+        Log::info("Doku Return - Customer kembali dari pembayaran untuk Order #{$orderId}. Status saat ini: {$order->status}");
 
         if ($order->status === 'processing' || $order->status === 'completed') {
+            // Jika webhook Doku sudah lebih dulu memproses, tampilkan pesan sukses
             session()->flash('success', 'Pembayaran berhasil! Pesanan Anda sedang diproses.');
         } else {
-            session()->flash('info', 'Pembayaran Anda sedang diverifikasi.');
+            // Status masih pending — menunggu verifikasi admin
+            session()->flash('info', 'Pembayaran Anda sedang diverifikasi oleh admin. Status pesanan akan diperbarui setelah pembayaran dikonfirmasi.');
         }
 
         return redirect()->route('shop.customers.account.orders.index');
