@@ -2,6 +2,27 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use App\Http\Controllers\IndoRegionController;
+use App\Http\Controllers\Admin\MultiChannelReportController;
+use App\Http\Controllers\Admin\SyncHistoryController;
+use Webkul\Core\Http\Middleware\NoCacheMiddleware;
+
+/**
+ * Halaman laporan tambahan di admin (Reporting).
+ *
+ * Memakai middleware & prefix yang sama dengan route admin Bagisto lainnya
+ * (lihat packages/Webkul/Admin/src/Routes/web.php) supaya autentikasi admin,
+ * bouncer/ACL, dan URL prefix-nya konsisten.
+ */
+Route::group([
+    'middleware' => ['admin', NoCacheMiddleware::class],
+    'prefix'     => config('app.admin_url'),
+], function () {
+    Route::get('reporting/multichannel', [MultiChannelReportController::class, 'index'])
+        ->name('admin.reporting.multichannel.index');
+
+    Route::get('reporting/sync-history', [SyncHistoryController::class, 'index'])
+        ->name('admin.reporting.synchistory.index');
+});
 
 Route::get('/indo-region/provinces', [IndoRegionController::class, 'getProvinces'])->name('api.provinces');
 Route::get('/indo-region/cities/{code}', [IndoRegionController::class, 'getCities'])->name('api.cities');
