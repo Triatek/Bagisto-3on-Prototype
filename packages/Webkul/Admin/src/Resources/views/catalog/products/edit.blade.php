@@ -180,7 +180,14 @@
                                 @foreach ($customAttributes as $attribute)
                                     {!! view_render_event("bagisto.admin.catalog.product.edit.form.{$group->code}.controls.before", ['product' => $product]) !!}
 
-                                    <x-admin::form.control-group class="last:!mb-0">
+                                    @php
+                                        $isShopeeSpecAttribute = in_array(strtolower($attribute->code), ['bahan', 'motif', 'asal', 'musim']);
+                                    @endphp
+
+                                    <x-admin::form.control-group
+                                        class="last:!mb-0"
+                                        data-depends-on="{{ $isShopeeSpecAttribute ? 'publish_to_shopee' : '' }}"
+                                    >
                                         <x-admin::form.control-group.label>
                                             {!! $attribute->admin_name . ($attribute->is_required ? '<span class="required"></span>' : '') !!}
 
@@ -285,5 +292,49 @@
     </x-admin::form>
 
     {!! view_render_event('bagisto.admin.catalog.product.edit.after', ['product' => $product]) !!}
+
+    @push('scripts')
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                /**
+                 * Input `publish_to_shopee` dirender di dalam <v-field>, jadi Vue
+                 * mengganti elemennya saat mount. Menyimpan referensi ke elemen /
+                 * memasang listener langsung padanya akan hilang begitu Vue render.
+                 * Karena itu: query ulang tiap kali, dan pakai delegation di document.
+                 */
+                function syncDependents() {
+                    var toggleCheckbox = document.getElementById('publish_to_shopee');
+
+                    if (! toggleCheckbox) {
+                        return;
+                    }
+
+                    document.querySelectorAll('[data-depends-on="publish_to_shopee"]').forEach(function (el) {
+                        el.classList.toggle('hidden', ! toggleCheckbox.checked);
+                    });
+                }
+
+                document.addEventListener('change', function (e) {
+                    if (e.target && e.target.id === 'publish_to_shopee') {
+                        syncDependents();
+                    }
+                });
+
+                syncDependents();
+
+                // Vue mount terjadi setelah DOMContentLoaded dan me-render ulang
+                // subtree form — sinkronkan lagi agar state awal tidak hilang.
+                var observer = new MutationObserver(syncDependents);
+
+                observer.observe(document.body, { childList: true, subtree: true });
+
+                setTimeout(function () {
+                    observer.disconnect();
+
+                    syncDependents();
+                }, 3000);
+            });
+        </script>
+    @endpush
 
 </x-admin::layouts>
