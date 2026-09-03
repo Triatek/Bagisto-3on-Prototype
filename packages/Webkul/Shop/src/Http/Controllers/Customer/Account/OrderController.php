@@ -124,25 +124,25 @@ class OrderController extends Controller
         return redirect()->back();
     }
     public function payNow($id)
-{
-    $order = $this->orderRepository->findOneWhere([
-        'customer_id' => auth()->guard('customer')->id(),
-        'id'          => $id,
-    ]);
+    {
+        $order = $this->orderRepository->findOneWhere([
+            'customer_id' => auth()->guard('customer')->id(),
+            'id'          => $id,
+        ]);
 
-    // Jika status sudah bukan pending, jangan biarkan bayar lagi
-    if (! $order || $order->status !== 'pending') {
-        session()->flash('info', 'Pesanan ini sudah dibayar atau sedang diproses.');
-        return redirect()->route('shop.customers.account.orders.index');
+        // Jika status sudah bukan pending, jangan biarkan bayar lagi
+        if (! $order || $order->status !== 'pending') {
+            session()->flash('info', 'Pesanan ini sudah dibayar atau sedang diproses.');
+            return redirect()->route('shop.customers.account.orders.index');
+        }
+
+        $dokuPaymentUrl = $order->payment->additional['doku_payment_url'] ?? null;
+
+        if (! $dokuPaymentUrl) {
+            session()->flash('error', 'Link pembayaran tidak ditemukan.');
+            return redirect()->back();
+        }
+
+        return redirect()->away($dokuPaymentUrl);
     }
-
-    $snapToken = $order->payment->additional['snap_token'] ?? null;
-
-    if (! $snapToken) {
-        session()->flash('error', 'Token pembayaran tidak ditemukan.');
-        return redirect()->back();
-    }
-
-    return redirect()->away("https://app.sandbox.midtrans.com/snap/v2/vtweb/" . $snapToken);
-}
 }

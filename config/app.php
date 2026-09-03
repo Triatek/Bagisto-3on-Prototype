@@ -258,7 +258,10 @@ return [
         // Triatek\RajaOngkirTest\Providers\RajaOngkirTestServiceProvider::class,
 
         //midtrans
-    Triatek\Midtrans\Providers\MidtransServiceProvider::class,
+        Triatek\Midtrans\Providers\MidtransServiceProvider::class,
+
+        //Doku
+        Triatek\Doku\Providers\DokuServiceProvider::class,
     ],
 
     /*

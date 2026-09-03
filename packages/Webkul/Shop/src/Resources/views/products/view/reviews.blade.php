@@ -161,7 +161,7 @@
                         <h3 class="mb-8 font-dmserif text-3xl max-md:mb-2.5 max-md:text-2xl max-sm:text-xl">
                             @lang('shop::app.products.view.reviews.customer-review')
 
-                            ({{ $reviewHelper->getTotalReviews($product) }})
+                            ({{ $reviewHelper->getTotalReviews($product->product ?? $product) }})
                         </h3>
 
                         <div class="flex gap-16 max-lg:flex-wrap max-sm:gap-5 max-sm:gap-x-0">
@@ -180,7 +180,7 @@
                                     </div>
 
                                     <p class="text-base text-zinc-500 max-sm:text-sm">
-                                        {{ $reviewHelper->getTotalFeedback($product) }}
+                                        {{ $reviewHelper->getTotalFeedback($product->product ?? $product) }}
 
                                         @lang('shop::app.products.view.reviews.ratings')
                                     </p>

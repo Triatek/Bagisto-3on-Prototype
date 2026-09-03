@@ -49,7 +49,7 @@
                 </div>
 
                 <div style="font-size: 16px;font-weight: 400;color: #384860;">
-                    {{ $invoice->order->shipping_title }}
+                    {!! $invoice->order->shipping_title !!}
                 </div>
             </div>
         @endif
