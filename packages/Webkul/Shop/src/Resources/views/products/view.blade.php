@@ -17,7 +17,7 @@
                 'name'  => $prod->name,
                 'price' => $prod->getTypeInstance()->getPriceHtml(),
                 'url'   => route('shop.product_or_category.index', $prod->url_key),
-                'image' => $prod->base_image_url ?? $productRepository->getBaseImage($prod)['small_image_url'],
+                'image' => \Webkul\Product\Facades\ProductImage::getProductBaseImage($prod)['small_image_url'],
             ];
         } else {
             return [
