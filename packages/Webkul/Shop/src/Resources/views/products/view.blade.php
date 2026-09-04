@@ -1,35 +1,8 @@
 @inject ('reviewHelper', 'Webkul\Product\Helpers\Review')
 @inject ('productViewHelper', 'Webkul\Product\Helpers\View')
-@inject ('productRepository', 'Webkul\Product\Repositories\ProductRepository')
 
 @php
-    // --- 1. CONFIGURASI HOTSPOT ---
-    $hotspotSettings = [
-        'point1' => ['id' => 64, 'top' => '10%', 'left' => '50%'],
-        'point2' => ['id' => 59, 'top' => '35%', 'left' => '45%'],
-        'point3' => ['id' => 54, 'top' => '50%', 'left' => '55%'],
-    ];
-
-    $getHotspotProduct = function($id) use ($productRepository) {
-        $prod = ($id > 0) ? $productRepository->find($id) : null;
-        if($prod) {
-            return [
-                'name'  => $prod->name,
-                'price' => $prod->getTypeInstance()->getPriceHtml(),
-                'url'   => route('shop.product_or_category.index', $prod->url_key),
-                'image' => \Webkul\Product\Facades\ProductImage::getProductBaseImage($prod)['small_image_url'],
-            ];
-        } else {
-            return [
-                'name'  => 'Contoh Produk',
-                'price' => '$100.00',
-                'url'   => '#',
-                'image' => 'https://via.placeholder.com/150/000000/FFFFFF/?text=Product',
-            ];
-        }
-    };
-
-    // --- 2. DATA STANDAR ---
+    // --- 1. DATA STANDAR ---
     $realProductModel = $product->product ?? $product;
     $avgRatings = $reviewHelper->getAverageRating($realProductModel);
     $totalReviews = $reviewHelper->getTotalFeedback($realProductModel);
@@ -52,15 +25,18 @@
     }
     if ($finalPromoDate && \Carbon\Carbon::parse($finalPromoDate)->isFuture()) $isPromoActive = true;
 
-    // --- 3. AMBIL RELATED PRODUCTS ---
+    // --- 2. AMBIL RELATED PRODUCTS ---
     $relatedProducts = $product->related_products()->take(10)->get();
     if($relatedProducts->isEmpty()){
         $relatedProducts = app('Webkul\Product\Repositories\ProductRepository')->scopeQuery(function($query) {
-            return $query->inRandomOrder()->take(8);
+            return $query->whereNull('products.parent_id')->inRandomOrder()->take(16);
         })->get();
     }
 
-    // --- 4. MATERIAL TEXT ---
+    // Buang produk tanpa url_key supaya link "You Maybe Interested in" tidak error.
+    $relatedProducts = $relatedProducts->filter(fn ($item) => ! empty($item->url_key))->take(8);
+
+    // --- 3. MATERIAL TEXT ---
     $materialText = trim(strip_tags($product->short_description));
     if(empty($materialText)) {
         $materialText = "Contains sustainable materials. This product is made with at least 50% recycled polyester fibers.";
@@ -141,27 +117,6 @@
         .stock-bar-bg { width: 100%; height: 6px; background: #e5e7eb; border-radius: 3px; margin-top: 5px; }
         .stock-bar-fill { height: 100%; background: #ef4444; border-radius: 3px; }
 
-        /* BANNER */
-        .custom-promo-banner { display: flex; flex-wrap: wrap; background: #e0e0e0; margin-top: 60px; height: 90vh; min-height: 600px; position: relative; overflow: visible !important; z-index: 10; }
-        .cpb-left { width: 50%; position: relative; background: #222; height: 100%; display: flex; align-items: center; justify-content: center; overflow: visible !important; }
-        .cpb-right { width: 50%; padding: 60px; display: flex; flex-direction: column; justify-content: center; background: #e0e0e0; height: 100%; z-index: 5; }
-        .cpb-img { width: 100%; height: 100%; object-fit: cover; object-position: center center; }
-
-        /* HOTSPOTS */
-        .hotspot { position: absolute; z-index: 100; cursor: pointer; }
-        .hotspot-dot { width: 24px; height: 24px; background: rgba(255, 255, 255, 0.4); border-radius: 50%; border: 2px solid #fff; position: relative; transition: all 0.3s ease; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-        .hotspot-dot::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 10px; height: 10px; background: #fff; border-radius: 50%; }
-        .hotspot:hover .hotspot-dot, .hotspot.active .hotspot-dot { background: #fff; transform: scale(1.2); }
-        .hotspot:hover .hotspot-dot::after, .hotspot.active .hotspot-dot::after { background: #000; }
-        .hotspot-card { position: absolute; left: 40px; top: 50%; transform: translateY(-50%); background: #fff; padding: 12px; width: 240px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); display: flex; gap: 12px; align-items: center; opacity: 0; visibility: hidden; transition: all 0.2s ease; pointer-events: none; z-index: 101; }
-        .hotspot.active .hotspot-card { opacity: 1; visibility: visible; pointer-events: auto; left: 50px; }
-        .hotspot-card::before { content: ''; position: absolute; left: -6px; top: 50%; transform: translateY(-50%); width: 0; height: 0; border-top: 6px solid transparent; border-bottom: 6px solid transparent; border-right: 6px solid #fff; }
-        .hc-thumb { width: 60px; height: 60px; object-fit: cover; border-radius: 4px; background: #f3f3f3; flex-shrink: 0;}
-        .hc-info { display: flex; flex-direction: column; justify-content: center; width: 100%;}
-        .hc-name { font-size: 13px; font-weight: bold; color: #000; margin-bottom: 3px; line-height: 1.2; }
-        .hc-price { font-size: 12px; color: #666; margin-bottom: 5px; }
-        .hc-link { font-size: 11px; text-transform: uppercase; font-weight: bold; color: #000; text-decoration: underline; }
-
         /* CAROUSEL */
         .interested-section { padding: 60px 20px; background: #fff; border-bottom: 1px solid #eee; }
         .is-header { font-family: Serif; font-size: 32px; margin-bottom: 30px; text-align: left; font-weight: bold; color: #000; }
@@ -184,20 +139,6 @@
         .is-colors { display: flex; gap: 8px; margin-top: 5px; min-height: 20px;}
         .is-color-dot { width: 20px; height: 20px; border-radius: 50%; border: 1px solid #ddd; cursor: pointer; position: relative; background-size: cover; }
         .is-color-dot.active { border: 1px solid #000; }
-
-        /* FASHION PERFORMANCE SECTION */
-        .fp-section { padding: 90px 20px; background: #fff; text-align: center; border-bottom: 1px solid #eee; }
-        .fp-container { max-width: 1200px; margin: 0 auto; }
-        .fp-header-block { margin-bottom: 60px; }
-        .fp-title { font-family: 'Times New Roman', Times, serif; font-size: 42px; font-weight: bold; text-transform: uppercase; margin-bottom: 15px; letter-spacing: 1px; color: #000; }
-        .fp-subtitle { font-family: Arial, sans-serif; font-size: 18px; color: #666; max-width: 800px; margin: 0 auto; line-height: 1.6; font-weight: 300; }
-        .fp-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; }
-        .fp-card { text-align: left; }
-        .fp-img-wrap { width: 100%; height: 500px; overflow: hidden; margin-bottom: 25px; background: #f4f4f4; position: relative; }
-        .fp-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s ease; }
-        .fp-card:hover .fp-img { transform: scale(1.03); }
-        .fp-content h3 { font-size: 22px; font-weight: bold; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: #000; font-family: 'Times New Roman', Times, serif; }
-        .fp-content p { font-size: 15px; color: #555; line-height: 1.7; font-family: Arial, sans-serif; }
 
         /* MODAL SIZE GUIDE */
         .sg-modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px); align-items: center; justify-content: center; }
@@ -230,15 +171,6 @@
         .pa-content { max-height: 0; overflow: hidden; transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
         .pa-body { padding-bottom: 25px; font-size: 15px; line-height: 1.6; color: #757575; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
         .pa-body p { margin-bottom: 10px; }
-        
-        /* PAYMENT ICONS (CENTERED BOX) */
-        .payment-trust-badge {
-            margin-top: 30px; margin-bottom: 20px; background-color: #f8f8f8; border: 1px solid #e5e5e5;
-            border-radius: 8px; padding: 20px; text-align: center;
-        }
-        .ptb-icons { display: flex; gap: 15px; align-items: center; justify-content: center; flex-wrap: wrap; margin-bottom: 8px; }
-        .ptb-icons img { height: 28px; width: auto; object-fit: contain; opacity: 0.9; }
-        .payment-label { font-size: 12px; text-transform: uppercase; font-weight: 700; letter-spacing: 1px; color: #555; display: block; margin-top: 5px; }
 
         /* REVIEWS SECTION (BOTTOM) */
         .reviews-only-section { padding: 60px 20px; max-width: 1600px; margin: 0 auto; }
@@ -251,16 +183,9 @@
             .product-info-wrapper { flex: 0 0 100% !important; max-width: 100% !important; width: 100% !important; padding-left: 0 !important; }
             .product-detail-page .flex.gap-9 > div:first-child { flex: 0 0 100% !important; max-width: 100% !important; width: 100% !important; }
             .product-detail-page .swiper-slide-thumb-active { height: 90px !important; }
-            .custom-promo-banner { flex-direction: column; height: auto; min-height: auto; }
-            .cpb-left { width: 100%; height: 500px; }
-            .cpb-right { width: 100%; height: auto; padding: 40px; }
-            .hotspot-card { left: 50% !important; top: 50px !important; transform: translateX(-50%) !important; }
             .is-card { width: 220px; min-width: 220px; }
             .is-img-wrapper { height: 280px; }
             .is-nav { display: none; }
-            .fp-grid { grid-template-columns: 1fr; gap: 50px; }
-            .fp-title { font-size: 28px; }
-            .fp-img-wrap { height: 400px; }
             .sg-body { flex-direction: column-reverse; padding: 20px; }
             .sg-right { width: 100%; }
             .sg-table { font-size: 12px; }
@@ -290,53 +215,6 @@
     </v-product>
 
         <div class="container-fluid" style="max-width: 100%; overflow-x: hidden;">
-
-        {{-- BANNER HOTSPOT --}}
-        <div class="custom-promo-banner">
-            <div class="cpb-left">
-                <img src="https://ik.imagekit.io/p16mdchf9/upscalemedia-transformed-removebg-preview%20(1).jpg" class="cpb-img" id="main-banner-img">
-                @php $p1 = $getHotspotProduct($hotspotSettings['point1']['id']); @endphp
-                <div class="hotspot" onclick="this.classList.toggle('active')" style="top: {{ $hotspotSettings['point1']['top'] }}; left: {{ $hotspotSettings['point1']['left'] }};"><div class="hotspot-dot"></div><div class="hotspot-card"><img src="{{ $p1['image'] }}" class="hc-thumb"><div class="hc-info"><div class="hc-name">{{ $p1['name'] }}</div><div class="hc-price">{!! $p1['price'] !!}</div><a href="{{ $p1['url'] }}" class="hc-link">View Product →</a></div></div></div>
-                @php $p2 = $getHotspotProduct($hotspotSettings['point2']['id']); @endphp
-                <div class="hotspot" onclick="this.classList.toggle('active')" style="top: {{ $hotspotSettings['point2']['top'] }}; left: {{ $hotspotSettings['point2']['left'] }};"><div class="hotspot-dot"></div><div class="hotspot-card"><img src="{{ $p2['image'] }}" class="hc-thumb"><div class="hc-info"><div class="hc-name">{{ $p2['name'] }}</div><div class="hc-price">{!! $p2['price'] !!}</div><a href="{{ $p2['url'] }}" class="hc-link">View Product →</a></div></div></div>
-                @php $p3 = $getHotspotProduct($hotspotSettings['point3']['id']); @endphp
-                <div class="hotspot" onclick="this.classList.toggle('active')" style="top: {{ $hotspotSettings['point3']['top'] }}; left: {{ $hotspotSettings['point3']['left'] }};"><div class="hotspot-dot"></div><div class="hotspot-card"><img src="{{ $p3['image'] }}" class="hc-thumb"><div class="hc-info"><div class="hc-name">{{ $p3['name'] }}</div><div class="hc-price">{!! $p3['price'] !!}</div><a href="{{ $p3['url'] }}" class="hc-link">View Product →</a></div></div></div>
-            </div>
-            <div class="cpb-right">
-                <span style="text-transform: uppercase; letter-spacing: 2px; color: #555; font-size: 14px; margin-bottom: 10px;">Collection</span>
-                <h2 style="font-family: Arial, sans-serif; font-size: 52px; margin-bottom: 25px; line-height: 1.1; font-weight: bold; color: #333;">{{ $product->name }}</h2>
-                <h3 style="font-size: 16px; font-weight: bold; margin-bottom: 10px; color: #333;">Description</h3>
-                <div style="color: #666; line-height: 1.8; margin-bottom: 35px; font-size: 15px; max-width: 550px;">
-                    {!! \Illuminate\Support\Str::limit(strip_tags($product->description), 400) !!}
-                </div>
-                <div style="font-size: 36px; font-weight: bold; margin-bottom: 35px; color: #333;">{!! $product->getTypeInstance()->getPriceHtml() !!}</div>
-                <a href="#" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;" style="display: inline-block; background: #000; color: #fff; padding: 18px 50px; text-transform: uppercase; font-weight: bold; border-radius: 4px; width: fit-content; font-size: 14px; letter-spacing: 1px;">Buy Now</a>
-            </div>
-        </div>
-
-        {{-- FASHION PERFORMANCE SECTION (PINDAH KE ATAS) --}}
-        <div class="fp-section">
-            <div class="fp-container">
-                <div class="fp-header-block">
-                    <h2 class="fp-title">Move Smarter on the Padel Court</h2>
-                    <p class="fp-subtitle">Kami menggabungkan siluet yang berfokus pada performa dengan bahan padel premium, menciptakan pakaian yang terlihat tajam dan bergerak dengan lancar pada setiap pukulan.</p>
-                </div>
-                <div class="fp-grid">
-                    <div class="fp-card">
-                        <div class="fp-img-wrap"><img src="https://ik.imagekit.io/p16mdchf9/padel-optimized-design.png" class="fp-img" alt="Movement"></div>
-                        <div class="fp-content"><h3>Padel-Optimized Design</h3><p>Lebih dari 45+ paten kami adaptasikan untuk kebutuhan padel. Setiap potongan dirancang untuk mendukung rotasi, kecepatan ayunan, dan kelincahan, sehingga gerakanmu tetap bebas dan tampilan tetap clean.</p></div>
-                    </div>
-                    <div class="fp-card">
-                        <div class="fp-img-wrap"><img src="https://ik.imagekit.io/p16mdchf9/high-performance-material.png" class="fp-img" alt="Luxury Fabric"></div>
-                        <div class="fp-content"><h3>High-Performance Materials</h3><p>Material premium kami ringan, breathable, dan cepat kering siap menghadapi rally panjang di lapangan indoor maupun outdoor sambil menjaga kenyamanan tubuh.</p></div>
-                    </div>
-                    <div class="fp-card">
-                        <div class="fp-img-wrap"><img src="https://ik.imagekit.io/p16mdchf9/player-friendly-features.png" class="fp-img" alt="Clever Cuts"></div>
-                        <div class="fp-content"><h3>Player-Friendly Features</h3><p>Setiap rok dan celana dilengkapi kantong sisi ganda yang mudah dijangkau, ergonomis, dan nyaman untuk pemain kidal maupun non-kidal—praktis tanpa mengorbankan gaya.</p></div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         {{-- YOU MAYBE INTERESTED IN (PINDAH KE BAWAH) --}}
         <div class="interested-section">
@@ -507,17 +385,6 @@
                                         <div class="pa-content"><div class="pa-body"><p>Your order of Rp 3,000,000 or more gets free standard delivery.</p><p><strong>Standard delivery</strong> 6–12 Working Days<br><strong>Express delivery</strong> 3–10 Working Days</p><p>During checkout, we'll provide you with the estimated delivery date based on your order's delivery address. Orders are processed and delivered Monday–Friday (excluding public holidays).</p><p>Nike Members enjoy free returns. Exclusions Apply.</p></div></div>
                                     </div>
                                 </div>
-
-                                {{-- PAYMENT TRUST BADGE (CENTERED) --}}
-                                <div class="payment-trust-badge">
-                                    <div class="ptb-icons">
-                                        <img src="https://upload.wikimedia.org/wikipedia/commons/a/a2/Logo_QRIS.svg" alt="QRIS" title="QRIS">
-                                        <img src="https://upload.wikimedia.org/wikipedia/commons/5/5c/Bank_Central_Asia.svg" alt="BCA" title="BCA">
-                                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f0/Bank_Negara_Indonesia_logo_%282004%29.svg/2560px-Bank_Negara_Indonesia_logo_%282004%29.svg.png" alt="BNI" title="BNI">
-                                        <img src="https://upload.wikimedia.org/wikipedia/commons/6/68/BANK_BRI_logo.svg" alt="BRI" title="BRI">
-                                    </div>
-                                    <span class="payment-label">Guarantee safe & secure checkout</span>
-                                </div>
                             </div>
                         </div>
                         <div class="mt-12 border-t border-gray-200 pt-10" id="review-section" style="width: 100%;">
@@ -587,9 +454,6 @@
                     var countDownDateStd = new Date("{{ $finalPromoDate }}").getTime();
                     var xStd = setInterval(function() { var now = new Date().getTime(); var distance = countDownDateStd - now; var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)); var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)); var seconds = Math.floor((distance % (1000 * 60)) / 1000); hours = hours < 10 ? "0" + hours : hours; minutes = minutes < 10 ? "0" + minutes : minutes; seconds = seconds < 10 ? "0" + seconds : seconds; let timerElemStd = document.getElementById("standard-timer"); if(timerElemStd) timerElemStd.innerHTML = hours + " : " + minutes + " : " + seconds; if (distance < 0) { clearInterval(xStd); if(timerElemStd) timerElemStd.innerHTML = "EXPIRED"; } }, 1000);
                 @endif
-                const hotspots = document.querySelectorAll('.hotspot');
-                hotspots.forEach(hotspot => { hotspot.addEventListener('click', function(e) { e.stopPropagation(); hotspots.forEach(h => { if (h !== this) h.classList.remove('active'); }); this.classList.toggle('active'); }); });
-                document.addEventListener('click', function() { hotspots.forEach(h => h.classList.remove('active')); });
             });
         </script>
     @endPushOnce
