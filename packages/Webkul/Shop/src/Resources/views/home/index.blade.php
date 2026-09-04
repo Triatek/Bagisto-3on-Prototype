@@ -57,6 +57,9 @@
                                                 $imageUrl = $image['medium_image_url'] ?? $image['small_image_url'] ?? '';
                                             @endphp
 
+                                            {{-- Lewati produk tanpa url_key (draft/varian): route-nya butuh parameter itu --}}
+                                            @continue(empty($product->url_key))
+
                                             <div class="na-card">
                                                 <a href="{{ route('shop.product_or_category.index', $product->url_key) }}">
                                                     <div class="na-image-box" style="background-image: url('{{ $imageUrl }}');">
