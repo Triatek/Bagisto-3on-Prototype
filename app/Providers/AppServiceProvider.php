@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\ParallelTesting;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\ServiceProvider;
 
-
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -46,6 +45,13 @@ class AppServiceProvider extends ServiceProvider
         // di-opt-in langsung diunggah ke marketplace (tanpa menunggu cron).
         // Sengaja update.after, bukan create.after — lihat catatan di listener.
         Event::listen('catalog.product.update.after', MarketplacePublishHook::class);
+
+        // Tombol WhatsApp mengambang di kanan bawah semua halaman toko.
+        // Disisipkan lewat view_render_event agar view core Bagisto tidak diedit.
+        // Titik tempelnya di luar <div id="app">, jadi tidak ikut dikompilasi Vue.
+        Event::listen('bagisto.shop.layout.body.after', function ($viewRenderEventManager) {
+            $viewRenderEventManager->addTemplate('whatsapp-float');
+        });
 
         $this->registerMultiChannelReportMenu();
     }
