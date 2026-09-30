@@ -30,7 +30,7 @@ class RajaOngkir extends AbstractShipping
         // 1. AMBIL ALAMAT TUJUAN
         $shippingAddress = $cart->shipping_address;
 
-        if (!$shippingAddress || !$shippingAddress->city) {
+        if (!$shippingAddress || (!$shippingAddress->postcode && !$shippingAddress->city)) {
             return false;
         }
 
@@ -52,8 +52,8 @@ class RajaOngkir extends AbstractShipping
 
         // ==================================================================
         
-        // 2. CARI ID KOTA TUJUAN
-        $destinationId = $this->getCityId($shippingAddress->city, $apiKey);
+        // 2. CARI ID TUJUAN (BERDASARKAN KODE POS, CADANGAN: NAMA KOTA)
+        $destinationId = $this->getDestinationId($shippingAddress->postcode, $shippingAddress->city, $apiKey);
 
         if (!$destinationId) {
             return false;
@@ -113,7 +113,15 @@ class RajaOngkir extends AbstractShipping
                             continue; 
                         }
 
-                        if (str_contains(strtoupper($cost['description']), 'CARGO') || str_contains(strtoupper($cost['description']), 'TRUCK')) {
+                        // Blokir layanan kargo/trucking & khusus (barang berbahaya, berharga, dokumen)
+                        // berdasarkan kata kunci di nama layanan maupun deskripsinya
+                        $blockedKeywords = [
+                            'CARGO', 'KARGO', 'TRUCK', 'DANGEROUS', 'VALUABLE', 'DOCUMENT', 'DOKUMEN'
+                        ];
+
+                        $serviceText = $serviceCode . ' ' . strtoupper($cost['description']);
+
+                        if (Str::contains($serviceText, $blockedKeywords)) {
                             continue;
                         }
 
@@ -146,27 +154,60 @@ class RajaOngkir extends AbstractShipping
         return $this->rates;
     }
 
-    // --- FUNGSI PENCARI ID KOTA ---
-    private function getCityId($cityName, $apiKey)
+    // --- FUNGSI PENCARI ID TUJUAN ---
+    // ID Komerce berada di tingkat kelurahan, jadi pencarian utama memakai kode pos.
+    // Pencarian nama kota hanya cadangan, karena "Kota Bandung" bisa cocok ke "Kota Agung" (Lampung).
+    private function getDestinationId($postcode, $cityName, $apiKey)
     {
-        return Cache::remember('city_id_' . Str::slug($cityName), 60 * 24, function () use ($cityName, $apiKey) {
-            try {
-                $response = Http::withoutVerifying()->withHeaders([
-                    'key' => $apiKey
-                ])->get('https://rajaongkir.komerce.id/api/v1/destination/domestic-destination', [
-                    'search' => $cityName 
-                ]);
+        $postcode = preg_replace('/\D/', '', (string) $postcode);
 
-                $body = $response->json();
-
-                if (isset($body['data']) && count($body['data']) > 0) {
-                    return $body['data'][0]['id']; 
+        if (strlen($postcode) === 5) {
+            $destinationId = Cache::remember('rajaongkir_dest_postcode_' . $postcode, 60 * 24, function () use ($postcode, $apiKey) {
+                foreach ($this->searchDestination($postcode, $apiKey) as $destination) {
+                    if ((string) $destination['zip_code'] === $postcode) {
+                        return $destination['id'];
+                    }
                 }
 
-            } catch (\Exception $e) {
                 return null;
+            });
+
+            if ($destinationId) {
+                return $destinationId;
             }
+        }
+
+        if (! $cityName) {
+            return null;
+        }
+
+        // Buang awalan "Kota" / "Kabupaten" / "Kab." agar tidak cocok ke nama daerah lain
+        $cityName = trim(preg_replace('/^(kota|kabupaten|kab\.?)\s+/i', '', trim($cityName)));
+
+        return Cache::remember('rajaongkir_dest_city_' . Str::slug($cityName), 60 * 24, function () use ($cityName, $apiKey) {
+            foreach ($this->searchDestination($cityName, $apiKey) as $destination) {
+                if (strcasecmp($destination['city_name'], $cityName) === 0) {
+                    return $destination['id'];
+                }
+            }
+
             return null;
         });
+    }
+
+    private function searchDestination($keyword, $apiKey)
+    {
+        try {
+            $response = Http::withoutVerifying()->withHeaders([
+                'key' => $apiKey
+            ])->get('https://rajaongkir.komerce.id/api/v1/destination/domestic-destination', [
+                'search' => $keyword,
+                'limit'  => 50,
+            ]);
+
+            return $response->json('data') ?: [];
+        } catch (\Exception $e) {
+            return [];
+        }
     }
 }
