@@ -36,4 +36,5 @@ services:
 #Docker Networks
 networks:
   app-network:
-    driver: bridge
+    # driver: bridge
+    external: true
