@@ -58,6 +58,10 @@ RUN docker-php-ext-install \
     intl \
     calendar
 
+RUN pecl install --onlyreqdeps --force redis \
+    && rm -rf /tmp/pear \
+    && docker-php-ext-enable redis
+
 # Copy local.ini explicitly
 COPY ./php/local.ini /usr/local/etc/php/php.ini
 
@@ -66,7 +70,7 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 COPY . .
 
 # Expose port 9000 and start php-fpm server
-# EXPOSE 9000
+EXPOSE 8000
 
 # Rewrite folder permission
 RUN chmod -R 775 storage bootstrap/cache
