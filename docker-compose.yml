@@ -1,40 +1,36 @@
-version: "3.8"
 services:
-  
-  #PHP Service
+  # Bagisto PHP-FPM
   bagistostore:
     build:
       context: .
       dockerfile: Dockerfile
-    image: bagistostore/php
+    image: bagistostore/php:2.3.8
     container_name: bagistostore
     restart: unless-stopped
-    tty: true
-    ports:
-      - "3000:8000"
     volumes:
-       - ./:/var/www
-       - ./php/local.ini:/usr/local/etc/php/php.ini
-       - /var/www/html/vendor
+      - ./:/var/www
+      - ./php/local.ini:/usr/local/etc/php/conf.d/99-local.ini:ro
+    expose:
+      - "9000"
     networks:
       - app-network
 
-  #Nginx Service
-  # webserverbagistostore:
-  #   image: nginx:alpine
-  #   container_name: webserverbagistostore
-  #   restart: unless-stopped
-  #   tty: true
-  #   ports:
-  #     - "3000:80"
-  #   volumes:
-  #     - ./:/var/www
-  #     - ./nginx/conf.d/:/etc/nginx/conf.d/
-  #   networks:
-  #     - app-network
+  # Nginx for Bagisto HTTP requests
+  webserverbagistostore:
+    image: nginx:alpine
+    container_name: webserverbagistostore
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3000:80"
+    volumes:
+      - ./:/var/www:ro
+      - ./nginx/conf.d/:/etc/nginx/conf.d/:ro
+    depends_on:
+      - bagistostore
+    networks:
+      - app-network
 
-#Docker Networks
 networks:
   app-network:
-    # driver: bridge
-    external: true
+    # external: true
+    driver: bridge

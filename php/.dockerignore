@@ -1,0 +1,66 @@
+```dockerignore
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# PHP dependencies
+vendor/
+
+# Frontend dependencies and generated build artifacts
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Logs and temporary files
+*.log
+*.tmp
+*.cache
+
+# Laravel runtime files
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# Tests and development tooling
+.phpunit.cache/
+coverage/
+.php-cs-fixer.cache
+
+# Docker-related files
+docker-compose*.yml
+Dockerfile*
+.dockerignore
+
+# Documentation
+README*
+CHANGELOG*
+CONTRIBUTING*
+docs/
+
+# Backups and archives
+*.bak
+*.backup
+*.sql
+*.sql.gz
+*.zip
+*.tar
+*.tar.gz
+```

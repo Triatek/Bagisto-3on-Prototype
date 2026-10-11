@@ -1,82 +1,81 @@
-FROM php:8.2.29-cli
+FROM php:8.2-fpm
 
-# Set working directory
 WORKDIR /var/www
 
-# Copy composer.lock and composer.json
-COPY composer.lock composer.json /var/www/
-
-RUN docker-php-ext-install pdo pdo_mysql
-
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends openssl libssl-dev libcurl4-openssl-dev \
-    && cp /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-
-ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
-
-RUN chmod +x /usr/local/bin/install-php-extensions && sync && \
-    install-php-extensions gd xdebug
-
-RUN apt-get update
-
-# Install useful tools
-RUN apt-get -y install apt-utils nano wget dialog vim
-
-# Install important libraries
-RUN apt-get -y install --fix-missing \
-    apt-utils \
-    build-essential \
+# System dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     curl \
-    libcurl4 \
-    libcurl4-openssl-dev \
-    zlib1g-dev \
-    libzip-dev \
+    unzip \
     zip \
-    libbz2-dev \
-    locales \
-    libmcrypt-dev \
     libicu-dev \
+    libzip-dev \
+    libpng-dev \
+    libjpeg62-turbo-dev \
+    libfreetype6-dev \
+    libxml2-dev \
     libonig-dev \
-    libxml2-dev
+    libbz2-dev \
+    libcurl4-openssl-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN docker-php-ext-install \
-    exif \
-    pcntl \
+# GD extension
+RUN docker-php-ext-configure gd \
+        --with-freetype \
+        --with-jpeg
+
+# PHP extensions
+RUN docker-php-ext-install -j"$(nproc)" \
     bcmath \
-    ctype \
-    curl \
-    iconv \
-    xml \
-    soap \
-    pcntl \
-    mbstring \
     bz2 \
-    zip \
+    calendar \
+    exif \
+    gd \
     intl \
-    calendar
+    mbstring \
+    mysqli \
+    opcache \
+    pcntl \
+    pdo_mysql \
+    soap \
+    zip
 
-RUN pecl install --onlyreqdeps --force redis \
-    && rm -rf /tmp/pear \
-    && docker-php-ext-enable redis
+# Redis extension
+RUN pecl install redis \
+    && docker-php-ext-enable redis \
+    && rm -rf /tmp/pear
 
-# Copy local.ini explicitly
-COPY ./php/local.ini /usr/local/etc/php/php.ini
+# Production PHP configuration
+RUN cp "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+COPY ./php/local.ini /usr/local/etc/php/conf.d/99-local.ini
 
+# Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+# Install PHP dependencies
+COPY composer.json composer.lock ./
+
+RUN composer install \
+    --no-dev \
+    --no-interaction \
+    --prefer-dist \
+    --optimize-autoloader \
+    --no-scripts
+
+# Copy application source
 COPY . .
 
-# Expose port 9000 and start php-fpm server
-EXPOSE 8000
+# Laravel writable directories
+RUN mkdir -p \
+        storage/framework/cache \
+        storage/framework/sessions \
+        storage/framework/views \
+        storage/logs \
+        bootstrap/cache \
+    && chown -R www-data:www-data storage bootstrap/cache \
+    && chmod -R ug+rwX storage bootstrap/cache
 
-# Rewrite folder permission
-RUN chmod -R 775 storage bootstrap/cache
+EXPOSE 9000
 
-# Remove symlinks
-RUN rm -rf public/storage
-
-# CMD [ "php", "artisan", "serve", "--host=0.0.0.0" ]
-CMD bash -c "composer install -n --optimize-autoloader && php artisan storage:link && php artisan serve --host=0.0.0.0"
+CMD ["php-fpm"]
