@@ -38,7 +38,6 @@ RUN docker-php-ext-install -j"$(nproc)" \
     bz2 \
     calendar \
     exif \
-    gd \
     intl \
     mbstring \
     mysqli \
