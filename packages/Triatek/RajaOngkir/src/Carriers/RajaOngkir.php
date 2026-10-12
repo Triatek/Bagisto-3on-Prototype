@@ -64,8 +64,7 @@ class RajaOngkir extends AbstractShipping
             'pos', 
             'tiki', 
             'sicepat', 
-            'jnt', 
-            'anteraja'
+            'jnt',
         ];
 
         // --- HITUNG BERAT ---
