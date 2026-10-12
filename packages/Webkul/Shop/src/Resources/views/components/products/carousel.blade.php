@@ -66,7 +66,7 @@
             class="container mt-20 max-lg:px-8 max-md:mt-8 max-sm:mt-7 max-sm:!px-4"
             v-if="! isLoading && products.length"
         >
-            <div class="relative flex justify-center items-center mb-10 mt-5">
+            <div class="relative flex flex-col items-center mb-10 mt-5 gap-2">
                 <div class="na-header">
                     <h2 class="na-title max-md:text-4xl max-sm:text-3xl">
                         @{{ title }}
@@ -74,7 +74,7 @@
                     <div class="na-underline"></div>
                 </div>
 
-                <div class="absolute right-0 top-1/2 -translate-y-1/2 hidden max-lg:flex" v-if="navigationLink">
+                <div class="hidden w-full max-lg:flex justify-end items-center" v-if="navigationLink">
                      <a :href="navigationLink" class="flex items-center gap-2 text-xl max-md:text-base">
                         @lang('shop::app.components.products.carousel.view-all')
                         <span class="icon-arrow-right text-2xl"></span>
