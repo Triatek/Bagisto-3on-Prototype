@@ -308,18 +308,19 @@
                                 {!! view_render_event('bagisto.shop.products.name.before', ['product' => $product]) !!}
                                 <div class="flex justify-between gap-4">
                                     {{-- LOGO DINAMIS DARI ADMIN PANEL --}}
-                                    <div class="w-full">
+                                    <!-- <div class="w-full">
                                         @if($logo = core()->getCurrentChannel()->logo_url)
                                             <img src="{{ $logo }}" alt="{{ core()->getCurrentChannel()->name }}" class="product-brand-logo">
                                         @else
                                             <span class="brand-logo-text">{{ core()->getCurrentChannel()->name }}</span>
                                         @endif
-                                    </div>
+                                    </div> -->
                                     @if (core()->getConfigData('customer.settings.wishlist.wishlist_option'))<div class="flex max-h-[46px] min-h-[46px] min-w-[46px] cursor-pointer items-center justify-center rounded-full border bg-white text-2xl transition-all hover:opacity-[0.8]" role="button" :class="isWishlist ? 'icon-heart-fill text-red-600' : 'icon-heart'" @click="addToWishlist"></div>@endif
                                 </div>
                                 {!! view_render_event('bagisto.shop.products.name.after', ['product' => $product]) !!}
                                 
-                                <h1 class="break-words text-3xl font-medium max-sm:text-xl product-title">{{ $product->name }}</h1>
+                                <p class="mt-6 break-words text-3xl font-bold max-sm:text-xl product-title">{{ $product->name }}</p>
+                                <!-- <h1 class="break-words text-3xl font-medium max-sm:text-xl product-title">{{ $product->name }}</h1> -->
                                 
                                 {{-- STAR RATING (SCROLL TO BOTTOM REVIEWS) --}}
                                 <div class="custom-star-rating" onclick="document.getElementById('review-section').scrollIntoView({behavior: 'smooth'})">
