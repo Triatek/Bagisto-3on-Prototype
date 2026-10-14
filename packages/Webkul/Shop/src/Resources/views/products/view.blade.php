@@ -378,13 +378,19 @@
                                         </button>
                                         <div class="pa-content"><div class="pa-body">{!! nl2br(e($materialText)) !!}</div></div>
                                     </div>
-                                    <!-- <div class="pa-item">
+                                    @if ($product->size_chart)
+                                    <div class="pa-item">
                                         <button type="button" class="pa-header" onclick="toggleAccordion(this)">
                                             <span class="pa-title">Size Chart</span>
                                             <span class="icon-arrow-down pa-icon"></span>
                                         </button>
-                                        <div class="pa-content"><div class="pa-body"><p>Your order of Rp 3,000,000 or more gets free standard delivery.</p><p><strong>Standard delivery</strong> 6–12 Working Days<br><strong>Express delivery</strong> 3–10 Working Days</p><p>During checkout, we'll provide you with the estimated delivery date based on your order's delivery address. Orders are processed and delivered Monday–Friday (excluding public holidays).</p><p>Nike Members enjoy free returns. Exclusions Apply.</p></div></div>
-                                    </div> -->
+                                        <div class="pa-content">
+                                            <div class="pa-body">
+                                                <img src="{{ Storage::url($product->size_chart) }}" alt="Product Size Chart" class="product-size-chart">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    @endif
                                 </div>
                             </div>
                         </div>
