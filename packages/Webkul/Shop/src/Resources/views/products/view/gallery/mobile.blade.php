@@ -53,8 +53,8 @@
                     <template v-else>
                         <img
                             class="aspect-square max-h-full w-full max-w-full select-none transition-transform duration-300 ease-in-out"
-                            :src="media.large_image_url"
-                            :alt="media.large_image_url"
+                            :src="media.original_image_url"
+                            :alt="media.original_image_url"
                         />
                     </template>
                 </div>
